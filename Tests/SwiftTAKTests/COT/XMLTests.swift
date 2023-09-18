@@ -9,7 +9,7 @@ import XCTest
 
 @testable import SwiftTAK
 
-final class COTTests: XCTestCase {
+final class XMLTests: XCTestCase {
     
     var cotMessage: COTMessage?
     let latitude = "0.0"
