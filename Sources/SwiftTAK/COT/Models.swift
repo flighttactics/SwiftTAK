@@ -159,7 +159,7 @@ public class COTMessage: NSObject {
     var phoneOS : String
     var appVersion : String
     
-    init(staleTimeMinutes: Double = 5.0,
+    public init(staleTimeMinutes: Double = 5.0,
          deviceID: String = UUID().uuidString,
                   phoneModel: String = "iPhone",
                   phoneOS: String = "iOS",
