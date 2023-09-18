@@ -8,11 +8,11 @@
 import Foundation
 
 public class PKCS12 {
-    let label: String?
-    let keyID: NSData?
-    let trust: SecTrust?
-    let certChain: [SecTrust]?
-    let identity: SecIdentity?
+    public let label: String?
+    public let keyID: NSData?
+    public let trust: SecTrust?
+    public let certChain: [SecTrust]?
+    public let identity: SecIdentity?
 
     // Creates a PKCS12 instance from a piece of data.
     // - Parameters:
