@@ -8,7 +8,19 @@
 import Foundation
 import ZIPFoundation
 
+public struct DataPackageContents {
+    public var userCertificate : Data = Data()
+    public var userCertificatePassword : String = ""
+    public var serverCertificate : Data = Data()
+    public var serverCertificatePassword : String = ""
+    public var serverURL : String = ""
+    public var serverPort : String = ""
+    public var serverProtocol : String = ""
+}
+
 public class DataPackageParser: NSObject {
+    
+    public var packageContents = DataPackageContents()
     
     let MANIFEST_FILE = "manifest.xml"
     var dataPackageContents: [String] = []
@@ -21,7 +33,7 @@ public class DataPackageParser: NSObject {
         super.init()
     }
     
-    func parse() {
+    public func parse() {
         processArchive()
     }
 
@@ -62,20 +74,9 @@ public class DataPackageParser: NSObject {
         _ = try? archive.extract(certFile) { data in
             certData.append(data)
         }
-        //SettingsStore.global.userCertificate = certData
+        packageContents.userCertificate = certData
         TAKLogger.debug("[DataPackageParser]: Storing User Certificate")
         TAKLogger.debug("[DataPackageParser]: " + String(describing: certData))
-        
-        //Parse the cert file
-        let parsedCert = PKCS12(data: certData, password: prefs.userCertificatePassword)
-        
-        guard let identity = parsedCert.identity else {
-            TAKLogger.error("[DataPackageParser]: Identity was not present in the parsed cert")
-            return
-        }
-        
-        // TODO: Keychain interface abstraction needed
-//        SettingsStore.global.storeIdentity(identity: identity, label: prefs.serverConnectionAddress())
         
         TAKLogger.debug("[DataPackageParser]: User Certificate Stored")
     }
@@ -90,21 +91,16 @@ public class DataPackageParser: NSObject {
             certData.append(data)
         }
         
-        // TODO: Store this in the keychain
-//        SettingsStore.global.serverCertificate = certData
+        packageContents.serverCertificate = certData
     }
     
     func storePreferences(preferences: TAKPreferences) {
-        // TODO: Where are we going to store these?
-//        SettingsStore.global.userCertificatePassword = preferences.userCertificatePassword
-//        SettingsStore.global.serverCertificatePassword = preferences.serverCertificatePassword
-//
-//        SettingsStore.global.takServerUrl = preferences.serverConnectionAddress()
-//        SettingsStore.global.takServerPort = preferences.serverConnectionPort()
-//        SettingsStore.global.takServerProtocol = preferences.serverConnectionProtocol()
-        
-        // TODO: Callbacks when things have changed the app should know about
-//        SettingsStore.global.takServerChanged = true
+        packageContents.userCertificatePassword = preferences.userCertificatePassword
+        packageContents.serverCertificatePassword = preferences.serverCertificatePassword
+
+        packageContents.serverURL = preferences.serverConnectionAddress()
+        packageContents.serverPort = preferences.serverConnectionPort()
+        packageContents.serverProtocol = preferences.serverConnectionProtocol()
     }
     
     func parsePrefsFile(archive:Archive, prefsFile: String) -> TAKPreferences {
