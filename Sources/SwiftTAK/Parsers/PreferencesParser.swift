@@ -45,7 +45,7 @@ public struct TAKPreferences {
 }
 
 public class PreferencesParser: NSObject, XMLParserDelegate {
-    var preferences: TAKPreferences = TAKPreferences()
+    public var preferences: TAKPreferences = TAKPreferences()
     
     private var textBuffer: String = ""
     private var currentAttr: String = ""
