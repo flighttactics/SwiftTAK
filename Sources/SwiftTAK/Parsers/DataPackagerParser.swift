@@ -27,7 +27,7 @@ public class DataPackageParser: NSObject {
     
     var archiveLocation: URL?
     
-    init (fileLocation:URL) {
+    public init (fileLocation:URL) {
         TAKLogger.debug("[DataPackageParser]: Initializing")
         archiveLocation = fileLocation
         super.init()
