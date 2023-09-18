@@ -8,7 +8,7 @@
 import Foundation
 import ZIPFoundation
 
-class DataPackageParser: NSObject {
+public class DataPackageParser: NSObject {
     
     let MANIFEST_FILE = "manifest.xml"
     var dataPackageContents: [String] = []

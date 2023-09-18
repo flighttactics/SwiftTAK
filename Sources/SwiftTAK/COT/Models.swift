@@ -11,7 +11,7 @@ protocol COTNode {
     func toXml() -> String
 }
 
-struct COTEvent : COTNode {
+public struct COTEvent : COTNode {
     var version:String
     var uid:String
     var type:String
@@ -36,7 +36,7 @@ struct COTEvent : COTNode {
     }
 }
 
-struct COTPoint : COTNode {
+public struct COTPoint : COTNode {
     var lat:String
     var lon:String
     var hae:String
@@ -54,7 +54,7 @@ struct COTPoint : COTNode {
     }
 }
 
-struct COTDetail : COTNode {
+public struct COTDetail : COTNode {
     var childNodes:[COTNode] = []
     
     func toXml() -> String {
@@ -64,14 +64,14 @@ struct COTDetail : COTNode {
     }
 }
 
-struct COTRemarks : COTNode {
+public struct COTRemarks : COTNode {
     
     func toXml() -> String {
         return "<remarks></remarks>"
     }
 }
 
-struct COTGroup : COTNode {
+public struct COTGroup : COTNode {
     var name:String
     var role:String
     
@@ -83,7 +83,7 @@ struct COTGroup : COTNode {
     }
 }
 
-struct COTStatus : COTNode {
+public struct COTStatus : COTNode {
     var battery:String
     
     func toXml() -> String {
@@ -93,7 +93,7 @@ struct COTStatus : COTNode {
     }
 }
 
-struct COTTakV : COTNode {
+public struct COTTakV : COTNode {
     var device:String
     var platform:String
     var os:String
@@ -109,7 +109,7 @@ struct COTTakV : COTNode {
     }
 }
 
-struct COTTrack : COTNode {
+public struct COTTrack : COTNode {
     var speed:String
     var course:String
     
@@ -121,7 +121,7 @@ struct COTTrack : COTNode {
     }
 }
 
-struct COTContact : COTNode {
+public struct COTContact : COTNode {
     var endpoint:String = "*:-1:stcp"
     var phone:String = ""
     var callsign:String
@@ -135,7 +135,7 @@ struct COTContact : COTNode {
     }
 }
 
-struct COTUid : COTNode {
+public struct COTUid : COTNode {
     var callsign:String
     
     func toXml() -> String {
@@ -145,12 +145,12 @@ struct COTUid : COTNode {
     }
 }
 
-class COTMessage: NSObject {
+public class COTMessage: NSObject {
     
-    static let DEFAULT_COT_TYPE = "a-f-G-U-C"
-    static let DEFAULT_HOW = "m-g"
-    static let DEFAULT_ERROR_NUMBER = "999999.0"
-    let COT_EVENT_VERSION = "2.0"
+    static public let DEFAULT_COT_TYPE = "a-f-G-U-C"
+    static public let DEFAULT_HOW = "m-g"
+    static public let DEFAULT_ERROR_NUMBER = "999999.0"
+    public let COT_EVENT_VERSION = "2.0"
     
     var staleTimeMinutes : Double
     var deviceID : String

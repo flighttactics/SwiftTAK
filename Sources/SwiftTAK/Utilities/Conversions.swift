@@ -7,26 +7,26 @@
 
 import Foundation
 
-enum SpeedUnit {
+public enum SpeedUnit {
     case MetersPerSecond
     case KmPerHour
     case FeetPerSecond
     case MilesPerHour
 }
 
-enum LocationUnit {
+public enum LocationUnit {
     case DMS
     //case MGRS
     case Decimal
 }
 
-enum DirectionUnit {
+public enum DirectionUnit {
     case MN
     case TN
 }
 
-struct UnitOrder {
-    static func nextSpeedUnit(unit:SpeedUnit) -> SpeedUnit {
+public struct UnitOrder {
+    public static func nextSpeedUnit(unit:SpeedUnit) -> SpeedUnit {
         let order = [SpeedUnit.MetersPerSecond,
                      SpeedUnit.KmPerHour,
                      SpeedUnit.FeetPerSecond,
@@ -41,7 +41,7 @@ struct UnitOrder {
         }
     }
     
-    static func nextLocationUnit(unit:LocationUnit) -> LocationUnit {
+    public static func nextLocationUnit(unit:LocationUnit) -> LocationUnit {
         switch unit {
         case LocationUnit.Decimal:
             return LocationUnit.DMS
@@ -50,7 +50,7 @@ struct UnitOrder {
         }
     }
     
-    static func nextDirectionUnit(unit:DirectionUnit) -> DirectionUnit {
+    public static func nextDirectionUnit(unit:DirectionUnit) -> DirectionUnit {
         switch unit {
         case DirectionUnit.MN:
             return DirectionUnit.TN
@@ -60,16 +60,16 @@ struct UnitOrder {
     }
 }
 
-class Conversions {
+public class Conversions {
     
-    static func formatOrZero(item: Double?, formatter: String = "%.0f") -> String {
+    public static func formatOrZero(item: Double?, formatter: String = "%.0f") -> String {
         guard let item = item else {
             return "0"
         }
         return String(format: formatter, item)
     }
     
-    static func convertToSpeedUnit(unit: SpeedUnit, metersPerSecond: Double) -> String {
+    public static func convertToSpeedUnit(unit: SpeedUnit, metersPerSecond: Double) -> String {
         let numFeetInOneMeter = 3.281
         let numFeetInOneMile = 5280.0
         switch(unit) {
@@ -89,31 +89,31 @@ class Conversions {
         }
     }
     
-    static func LatLongToMGRS(latitude: Double, longitude: Double) -> String {
+    public static func LatLongToMGRS(latitude: Double, longitude: Double) -> String {
         return ""
     }
     
-    static func LatLonToDMS(latitude: Double) -> String {
+    public static func LatLonToDMS(latitude: Double) -> String {
         let direction = latitude > 0 ? "N" : "S"
         let unsignedDMS = ConvertToUnsignedDMS(latOrLong: latitude)
         return "\(direction)  \(unsignedDMS)"
     }
     
-    static func LatLonToDMS(longitude: Double) -> String {
+    public static func LatLonToDMS(longitude: Double) -> String {
         let direction = longitude > 0 ? "E" : "W"
         let unsignedDMS = ConvertToUnsignedDMS(latOrLong: longitude)
         return "\(direction)  \(unsignedDMS)"
     }
     
-    static func LatLonToDecimal(latitude: Double) -> String {
+    public static func LatLonToDecimal(latitude: Double) -> String {
         return Conversions.formatOrZero(item: latitude, formatter: "%.4f")
     }
     
-    static func LatLonToDecimal(longitude: Double) -> String {
+    public static func LatLonToDecimal(longitude: Double) -> String {
         return Conversions.formatOrZero(item: longitude, formatter: "%.4f")
     }
     
-    static func ConvertToUnsignedDMS(latOrLong: Double) -> String {
+    public static func ConvertToUnsignedDMS(latOrLong: Double) -> String {
         let absDegrees = abs(latOrLong)
         let floorAbsDegrees = floor(absDegrees)
         

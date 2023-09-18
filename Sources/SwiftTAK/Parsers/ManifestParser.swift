@@ -7,14 +7,14 @@
 
 import Foundation
 
-class ManifestParser: NSObject, XMLParserDelegate {
-    var fileNames = [String]()
+public class ManifestParser: NSObject, XMLParserDelegate {
+    public var fileNames = [String]()
     
-    func prefsFile() -> String {
+    public func prefsFile() -> String {
         return fileNames.first(where: { $0.contains(".pref")}) ?? ""
     }
     
-    func parser(
+    public func parser(
         _ parser: XMLParser,
         didStartElement elementName: String,
         namespaceURI: String?,

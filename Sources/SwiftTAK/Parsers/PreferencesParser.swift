@@ -7,54 +7,54 @@
 
 import Foundation
 
-struct TAKPreferences {
-    var userCertificateFile = ""
-    var userCertificatePassword = ""
-    var serverCertificateFile = ""
-    var serverCertificatePassword = ""
-    var serverDescription = ""
-    var serverConnectionString = ""
-    var serverEnabled = true
+public struct TAKPreferences {
+    public var userCertificateFile = ""
+    public var userCertificatePassword = ""
+    public var serverCertificateFile = ""
+    public var serverCertificatePassword = ""
+    public var serverDescription = ""
+    public var serverConnectionString = ""
+    public var serverEnabled = true
     
-    func userCertificateFileName() -> String {
+    public func userCertificateFileName() -> String {
         let splitFile = userCertificateFile.components(separatedBy: "/")
         TAKLogger.debug(String(describing: splitFile))
         return splitFile[splitFile.count-1]
     }
     
-    func serverCertificateFileName() -> String {
+    public func serverCertificateFileName() -> String {
         let splitFile = serverCertificateFile.components(separatedBy: "/")
         TAKLogger.debug(String(describing: splitFile))
         return splitFile[splitFile.count-1]
     }
     
-    func serverConnectionAddress() -> String {
+    public func serverConnectionAddress() -> String {
         let splitFile = serverConnectionString.components(separatedBy: ":")
         return splitFile.count > 0 ? splitFile[0] : ""
     }
     
-    func serverConnectionPort() -> String {
+    public func serverConnectionPort() -> String {
         let splitFile = serverConnectionString.components(separatedBy: ":")
         return splitFile.count > 1 ? splitFile[1] : ""
     }
     
-    func serverConnectionProtocol() -> String {
+    public func serverConnectionProtocol() -> String {
         let splitFile = serverConnectionString.components(separatedBy: ":")
         return splitFile.count > 2 ? splitFile[2] : ""
     }
 }
 
-class PreferencesParser: NSObject, XMLParserDelegate {
+public class PreferencesParser: NSObject, XMLParserDelegate {
     var preferences: TAKPreferences = TAKPreferences()
     
     private var textBuffer: String = ""
     private var currentAttr: String = ""
     
-    func parser(_ parser: XMLParser, foundCharacters string: String) {
+    public func parser(_ parser: XMLParser, foundCharacters string: String) {
         textBuffer += string
     }
     
-    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+    public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
         if(elementName == "entry") {
             switch currentAttr {
             case("description0"):
@@ -77,7 +77,7 @@ class PreferencesParser: NSObject, XMLParserDelegate {
         }
     }
     
-    func parser(
+    public func parser(
         _ parser: XMLParser,
         didStartElement elementName: String,
         namespaceURI: String?,
