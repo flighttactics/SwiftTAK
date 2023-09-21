@@ -23,9 +23,9 @@ public struct TAKConstants {
     
     public static let UDP_BROADCAST_URL = "239.2.3.1"
     
-    public static let TEAM_COLORS = TeamColor.allCases
-    public static let TEAM_ROLES = TeamRole.allCases
-    public static let UNIT_TYPES = UnitType.allCases
+    public static let TEAM_COLORS = TeamColor.allCases.map { $0.rawValue }
+    public static let TEAM_ROLES = TeamRole.allCases.map { $0.rawValue }
+    public static let UNIT_TYPES = UnitType.allCases.map { $0.rawValue }
     
     // Helper Functions
     public static func certificateSigningPath(clientUid: String, appVersion: String) -> String {
