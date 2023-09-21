@@ -26,6 +26,7 @@ public struct TAKConstants {
     public static let TEAM_COLORS = TeamColor.allCases.map { $0.rawValue }
     public static let TEAM_ROLES = TeamRole.allCases.map { $0.rawValue }
     public static let UNIT_TYPES = UnitType.allCases.map { $0.rawValue }
+    public static let EMERGENCY_TYPES = EmergencyType.allCases.map { $0.rawValue }
     
     // Helper Functions
     public static func certificateSigningPath(clientUid: String, appVersion: String) -> String {
@@ -67,4 +68,22 @@ public enum UnitType: String, CaseIterable {
     case Ground = "Ground"
     case Air = "Air"
     case Sea = "Sea"
+}
+
+public enum EmergencyType: String, CaseIterable, CustomStringConvertible {
+    case NineOneOne = "911 Alert"
+    case Cancel = "Cancel Alert"
+    case Geofence = "Geo-fence Breached"
+    case RingTheBell = "Ring The Bell"
+    case InContact = "In Contact"
+    
+    public var description: String {
+        switch self {
+        case .NineOneOne: return "b-a-o-tbl"
+        case .Cancel: return "b-a-o-can"
+        case .Geofence: return "b-a-g"
+        case .RingTheBell: return "b-a-o-pan"
+        case .InContact: return "b-a-o-opn"
+        }
+    }
 }

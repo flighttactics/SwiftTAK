@@ -26,4 +26,18 @@ final class XMLTests: XCTestCase {
         let result = cotMessage!.generateCOTXml(latitude: latitude, longitude: longitude, callSign: callSign, group: group, role: role, phoneBatteryStatus: "")
         XCTAssert(!result.contains("battery"), "Battery Node was included with empty battery status")
     }
+    
+    func testGeneratingEmergencyAlertIncludesEmergencyNode() throws {
+        let result = cotMessage!.generateEmergencyCOTXml(latitude: latitude, longitude: longitude, callSign: callSign, emergencyType: EmergencyType.NineOneOne, isCancelled: false)
+        TAKLogger.debug(result)
+        XCTAssert(result.contains("<emergency"), "Emergency Node was not included")
+        XCTAssert(result.contains("cancel='false'"), "Emergency cancelled status was not included")
+        XCTAssert(result.contains("TEST-1-Alert"), "Alert callsign was not included")
+        XCTAssert(result.contains("relation='p-p'"), "Link relation was not included")
+    }
+    
+    func testGeneratingCancelledEmergencyProperlyAddsCancelledAttribute() throws {
+        let result = cotMessage!.generateEmergencyCOTXml(latitude: latitude, longitude: longitude, callSign: callSign, emergencyType: EmergencyType.Cancel, isCancelled: true)
+        XCTAssert(result.contains("cancel='true'"), "Emergency cancelled status was not included")
+    }
 }

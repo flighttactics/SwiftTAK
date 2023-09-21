@@ -64,6 +64,28 @@ public struct COTDetail : COTNode {
     }
 }
 
+public struct COTLink : COTNode {
+    var parentCallsign: String = ""
+    var productionTime: String = ""
+    var relation: String
+    var type: String
+    var uid: String
+    var callsign: String = ""
+    var remarks: String = ""
+    
+    func toXml() -> String {
+        return "<link " +
+        "parent_callsign='\(parentCallsign)' " +
+        "production_time='\(productionTime)' " +
+        "relation='\(relation)' " +
+        "type='\(type)' " +
+        "uid='\(uid)' " +
+        "callsign='\(callsign)' " +
+        "remarks='\(remarks)' " +
+        "</link>"
+    }
+}
+
 public struct COTRemarks : COTNode {
     
     func toXml() -> String {
@@ -145,6 +167,20 @@ public struct COTUid : COTNode {
     }
 }
 
+public struct COTEmergency : COTNode {
+    var cancel: Bool
+    var type: EmergencyType
+    var callsign: String
+    
+    func toXml() -> String {
+        return "<emergency " +
+        "cancel='\(cancel.description)' " +
+        "type='\(type)'>" +
+        callsign +
+        "</emergency>"
+    }
+}
+
 public class COTMessage: NSObject {
     
     static public let DEFAULT_COT_TYPE = "a-f-G-U-C"
@@ -172,6 +208,35 @@ public class COTMessage: NSObject {
         self.appPlatform = appPlatform
         self.appVersion = appVersion
         super.init()
+    }
+    
+    public func generateEmergencyCOTXml(cotType: String = DEFAULT_COT_TYPE, heightAboveElipsoid: String = DEFAULT_ERROR_NUMBER,
+                                circularError: String = DEFAULT_ERROR_NUMBER,
+                                linearError: String = DEFAULT_ERROR_NUMBER,
+                                latitude: String,
+                                longitude: String,
+                                callSign: String,
+                                emergencyType: EmergencyType,
+                                isCancelled: Bool) -> String {
+        let cotTimeout = 10.0
+        let deviceID = deviceID
+        let eventType = emergencyType.description
+        
+        var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: eventType, how: "h-g-i-g-o", time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
+        
+        let cotPoint = COTPoint(lat: latitude, lon: longitude, hae: heightAboveElipsoid, ce: circularError, le: linearError)
+        
+        cotEvent.childNodes.append(cotPoint)
+        
+        var cotDetail = COTDetail()
+        
+        cotDetail.childNodes.append(COTLink(relation: "p-p", type: cotType, uid: deviceID))
+        cotDetail.childNodes.append(COTContact(callsign: "\(callSign)-Alert"))
+        cotDetail.childNodes.append(COTEmergency(cancel: isCancelled, type: emergencyType, callsign: callSign))
+                                    
+        cotEvent.childNodes.append(cotDetail)
+        
+        return "<?xml version=\"1.0\" standalone=\"yes\"?>" + cotEvent.toXml()
     }
     
     public func generateCOTXml(cotType: String = DEFAULT_COT_TYPE,
