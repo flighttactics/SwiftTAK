@@ -81,8 +81,8 @@ public struct COTLink : COTNode {
         "type='\(type)' " +
         "uid='\(uid)' " +
         "callsign='\(callsign)' " +
-        "remarks='\(remarks)' " +
-        "</link>"
+        "remarks='\(remarks)'" +
+        "></link>"
     }
 }
 
