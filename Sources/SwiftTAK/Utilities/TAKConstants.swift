@@ -36,7 +36,7 @@ public struct TAKConstants {
     }
 }
 
-public enum TeamRole: String, CaseIterable {
+public enum TeamRole: String, CaseIterable, Identifiable {
     case TeamMember = "Team Member"
     case TeamLead = "Team Lead"
     case HQ = "HQ"
@@ -45,9 +45,11 @@ public enum TeamRole: String, CaseIterable {
     case ForwardObserver = "Forward Observer"
     case RTO = "RTO"
     case K9 = "K9"
+    
+    public var id: Self { self }
 }
 
-public enum TeamColor: String, CaseIterable {
+public enum TeamColor: String, CaseIterable, Identifiable {
     case Blue = "Blue"
     case DarkBlue = "Dark Blue"
     case Brown = "Brown"
@@ -62,15 +64,19 @@ public enum TeamColor: String, CaseIterable {
     case Teal = "Teal"
     case White = "White"
     case Yellow = "Yellow"
+    
+    public var id: Self { self }
 }
 
-public enum UnitType: String, CaseIterable {
+public enum UnitType: String, CaseIterable, Identifiable {
     case Ground = "Ground"
     case Air = "Air"
     case Sea = "Sea"
+    
+    public var id: Self { self }
 }
 
-public enum EmergencyType: String, CaseIterable, CustomStringConvertible {
+public enum EmergencyType: String, CaseIterable, CustomStringConvertible, Identifiable {
     case NineOneOne = "911 Alert"
     case Cancel = "Cancel Alert"
     case Geofence = "Geo-fence Breached"
@@ -86,4 +92,6 @@ public enum EmergencyType: String, CaseIterable, CustomStringConvertible {
         case .InContact: return "b-a-o-opn"
         }
     }
+    
+    public var id: Self { self }
 }
