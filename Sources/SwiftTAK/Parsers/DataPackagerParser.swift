@@ -16,6 +16,8 @@ public struct DataPackageContents {
     public var serverURL : String = ""
     public var serverPort : String = ""
     public var serverProtocol : String = ""
+    
+    public init() {}
 }
 
 public class DataPackageParser: NSObject {
