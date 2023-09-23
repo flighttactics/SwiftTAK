@@ -8,6 +8,15 @@
 import Foundation
 
 public struct COTChat : COTNode {
+    public init(id: String = "All Chat Rooms", chatroom: String = "All Chat Rooms", groupOwner: String = "", parent: String = "", senderCallsign: String = "", messageID: String = UUID().uuidString) {
+        self.id = id
+        self.chatroom = chatroom
+        self.groupOwner = groupOwner
+        self.parent = parent
+        self.senderCallsign = senderCallsign
+        self.messageID = messageID
+    }
+    
     public var id:String = "All Chat Rooms"
     public var chatroom:String = "All Chat Rooms"
     public var groupOwner:String = ""

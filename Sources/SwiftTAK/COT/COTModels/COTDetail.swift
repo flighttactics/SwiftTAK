@@ -8,6 +8,10 @@
 import Foundation
 
 public struct COTDetail : COTNode {
+    public init(childNodes: [COTNode] = []) {
+        self.childNodes = childNodes
+    }
+    
     public var childNodes:[COTNode] = []
     
     public func toXml() -> String {

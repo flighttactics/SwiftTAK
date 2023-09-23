@@ -8,6 +8,17 @@
 import Foundation
 
 public struct COTEvent : COTNode {
+    public init(version: String, uid: String, type: String, how: String, time: Date, start: Date, stale: Date, childNodes: [COTNode] = []) {
+        self.version = version
+        self.uid = uid
+        self.type = type
+        self.how = how
+        self.time = time
+        self.start = start
+        self.stale = stale
+        self.childNodes = childNodes
+    }
+    
     public var version:String
     public var uid:String
     public var type:String

@@ -8,6 +8,12 @@
 import Foundation
 
 public struct COTRemarks : COTNode {
+    public init(source: String = "", timestamp: String = "", message: String = "") {
+        self.source = source
+        self.timestamp = timestamp
+        self.message = message
+    }
+    
     
     public var source: String = ""
     public var timestamp: String = ""

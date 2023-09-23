@@ -8,6 +8,15 @@
 import Foundation
 
 public struct COTLink : COTNode {
+    public init(parentCallsign: String = "", productionTime: String = "", relation: String, type: String, uid: String, callsign: String = "") {
+        self.parentCallsign = parentCallsign
+        self.productionTime = productionTime
+        self.relation = relation
+        self.type = type
+        self.uid = uid
+        self.callsign = callsign
+    }
+    
     public var parentCallsign: String = ""
     public var productionTime: String = ""
     public var relation: String

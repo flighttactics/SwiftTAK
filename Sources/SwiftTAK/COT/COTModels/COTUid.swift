@@ -8,6 +8,10 @@
 import Foundation
 
 public struct COTUid : COTNode {
+    public init(callsign: String) {
+        self.callsign = callsign
+    }
+    
     public var callsign:String
     
     public func toXml() -> String {

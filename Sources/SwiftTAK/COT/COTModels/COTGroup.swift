@@ -8,6 +8,11 @@
 import Foundation
 
 public struct COTGroup : COTNode {
+    public init(name: String, role: String) {
+        self.name = name
+        self.role = role
+    }
+    
     public var name:String
     public var role:String
     

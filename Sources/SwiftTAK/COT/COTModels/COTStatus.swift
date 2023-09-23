@@ -8,6 +8,10 @@
 import Foundation
 
 public struct COTStatus : COTNode {
+    public init(battery: String) {
+        self.battery = battery
+    }
+    
     public var battery:String
     
     public func toXml() -> String {

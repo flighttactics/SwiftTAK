@@ -8,6 +8,10 @@
 import Foundation
 
 public struct COTServerDestination : COTNode {
+    public init(destinations: String = "") {
+        self.destinations = destinations
+    }
+    
     
     public var destinations: String = ""
     

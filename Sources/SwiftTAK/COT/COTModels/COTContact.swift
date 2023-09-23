@@ -8,6 +8,12 @@
 import Foundation
 
 public struct COTContact : COTNode {
+    public init(endpoint: String = "*:-1:stcp", phone: String = "", callsign: String) {
+        self.endpoint = endpoint
+        self.phone = phone
+        self.callsign = callsign
+    }
+    
     public var endpoint:String = "*:-1:stcp"
     public var phone:String = ""
     public var callsign:String

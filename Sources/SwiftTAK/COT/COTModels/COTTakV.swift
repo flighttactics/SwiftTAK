@@ -8,6 +8,13 @@
 import Foundation
 
 public struct COTTakV : COTNode {
+    public init(device: String, platform: String, os: String, version: String) {
+        self.device = device
+        self.platform = platform
+        self.os = os
+        self.version = version
+    }
+    
     public var device:String
     public var platform:String
     public var os:String

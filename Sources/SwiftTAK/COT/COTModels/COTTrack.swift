@@ -8,6 +8,11 @@
 import Foundation
 
 public struct COTTrack : COTNode {
+    public init(speed: String, course: String) {
+        self.speed = speed
+        self.course = course
+    }
+    
     public var speed:String
     public var course:String
     
