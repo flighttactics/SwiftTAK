@@ -103,7 +103,10 @@ public class COTMessage: NSObject {
         return "<?xml version=\"1.0\" standalone=\"yes\"?>" + cotEvent.toXml()
     }
     
-    public func generateChatMessage(message: String, destinationUrl: String) -> String {
+    public func generateChatMessage(message: String,
+                                    sender: String,
+                                    receiver: String = "All Chat Rooms",
+                                    destinationUrl: String) -> String {
         let cotType = "b-t-f"
         let cotHow = "h-g-i-g-o"
         var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: cotType, how: cotHow, time: Date(), start: Date(), stale: Date().addingTimeInterval(0))
@@ -112,7 +115,7 @@ public class COTMessage: NSObject {
 
         var cotDetail = COTDetail()
         
-        let messageID = UUID().uuidString
+        let messageID = sender
         
         let cotChat = COTChat(messageID: messageID)
         let cotLink = COTLink(relation: "p-p", type: "a-f-G-U-C", uid: messageID)
