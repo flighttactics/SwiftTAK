@@ -8,13 +8,13 @@
 import Foundation
 
 public struct COTPoint : COTNode {
-    var lat:String
-    var lon:String
-    var hae:String
-    var ce:String
-    var le:String
+    public var lat:String
+    public var lon:String
+    public var hae:String
+    public var ce:String
+    public var le:String
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<point " +
         "lat='\(lat)' " +
         "lon='\(lon)' " +

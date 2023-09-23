@@ -8,16 +8,16 @@
 import Foundation
 
 public struct COTEvent : COTNode {
-    var version:String
-    var uid:String
-    var type:String
-    var how:String
-    var time:Date
-    var start:Date
-    var stale:Date
-    var childNodes:[COTNode] = []
+    public var version:String
+    public var uid:String
+    public var type:String
+    public var how:String
+    public var time:Date
+    public var start:Date
+    public var stale:Date
+    public var childNodes:[COTNode] = []
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<event " +
         "version='\(version)' " +
         "uid='\(uid)' " +

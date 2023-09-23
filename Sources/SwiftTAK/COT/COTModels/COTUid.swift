@@ -8,9 +8,9 @@
 import Foundation
 
 public struct COTUid : COTNode {
-    var callsign:String
+    public var callsign:String
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<uid " +
         "Droid='\(callsign)'" +
         "></uid>"

@@ -8,10 +8,10 @@
 import Foundation
 
 public struct COTGroup : COTNode {
-    var name:String
-    var role:String
+    public var name:String
+    public var role:String
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<__group " +
         "name='\(name)' " +
         "role='\(role)'" +

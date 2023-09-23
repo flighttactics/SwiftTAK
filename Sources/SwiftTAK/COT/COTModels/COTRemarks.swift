@@ -9,11 +9,11 @@ import Foundation
 
 public struct COTRemarks : COTNode {
     
-    var source: String = ""
-    var timestamp: String = ""
-    var message: String = ""
+    public var source: String = ""
+    public var timestamp: String = ""
+    public var message: String = ""
     
-    func toXml() -> String {
+    public func toXml() -> String {
         let sourceAttr = source.isEmpty ? "" : "source='\(source)' "
         let timestampAttr = timestamp.isEmpty ? "" : "timestamp='\(timestamp)' "
         return "<remarks " +

@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol COTNode {
+public protocol COTNode {
     func toXml() -> String
 }

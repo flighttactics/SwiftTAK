@@ -8,9 +8,9 @@
 import Foundation
 
 public struct COTStatus : COTNode {
-    var battery:String
+    public var battery:String
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<status " +
         "battery='\(battery)'" +
         "></status>"

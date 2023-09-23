@@ -8,14 +8,14 @@
 import Foundation
 
 public struct COTLink : COTNode {
-    var parentCallsign: String = ""
-    var productionTime: String = ""
-    var relation: String
-    var type: String
-    var uid: String
-    var callsign: String = ""
+    public var parentCallsign: String = ""
+    public var productionTime: String = ""
+    public var relation: String
+    public var type: String
+    public var uid: String
+    public var callsign: String = ""
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<link " +
         "parent_callsign='\(parentCallsign)' " +
         "production_time='\(productionTime)' " +

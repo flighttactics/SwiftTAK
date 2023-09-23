@@ -8,9 +8,9 @@
 import Foundation
 
 public struct COTDetail : COTNode {
-    var childNodes:[COTNode] = []
+    public var childNodes:[COTNode] = []
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<detail>" +
         childNodes.map { $0.toXml() }.joined() +
         "</detail>"

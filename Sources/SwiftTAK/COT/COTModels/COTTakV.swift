@@ -8,12 +8,12 @@
 import Foundation
 
 public struct COTTakV : COTNode {
-    var device:String
-    var platform:String
-    var os:String
-    var version:String
+    public var device:String
+    public var platform:String
+    public var os:String
+    public var version:String
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<takv " +
         "device='\(device)' " +
         "platform='\(platform)' " +

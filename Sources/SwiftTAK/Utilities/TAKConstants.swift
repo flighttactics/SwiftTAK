@@ -23,6 +23,10 @@ public struct TAKConstants {
     
     public static let UDP_BROADCAST_URL = "239.2.3.1"
     
+    // Other constants
+    public static let DEFAULT_CHATROOM_NAME = "All Chat Rooms"
+    
+    // Handy string array representations of some of the enums
     public static let TEAM_COLORS = TeamColor.allCases.map { $0.rawValue }
     public static let TEAM_ROLES = TeamRole.allCases.map { $0.rawValue }
     public static let UNIT_TYPES = UnitType.allCases.map { $0.rawValue }

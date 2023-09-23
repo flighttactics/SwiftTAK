@@ -9,9 +9,9 @@ import Foundation
 
 public struct COTServerDestination : COTNode {
     
-    var destinations: String = ""
+    public var destinations: String = ""
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<__serverdestination " +
         "destinations='\(destinations)'" + 
         ">" +

@@ -105,27 +105,35 @@ public class COTMessage: NSObject {
     
     public func generateChatMessage(message: String,
                                     sender: String,
-                                    receiver: String = "All Chat Rooms",
+                                    receiver: String = TAKConstants.DEFAULT_CHATROOM_NAME,
                                     destinationUrl: String) -> String {
         let cotType = "b-t-f"
         let cotHow = "h-g-i-g-o"
-        var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: cotType, how: cotHow, time: Date(), start: Date(), stale: Date().addingTimeInterval(0))
+        let ONE_DAY = 60.0*60.0*24.0
+        let eventTime = Date()
+        let stale = Date().addingTimeInterval(ONE_DAY)
+        
+        let from = sender
+        let conversationID = UUID().uuidString
+        let messageID = UUID().uuidString
+        
+        let eventUID = "GeoChat.\(from).\(conversationID).\(messageID)"
+        
+        var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: eventUID, type: cotType, how: cotHow, time: eventTime, start: eventTime, stale: stale)
         
         cotEvent.childNodes.append(COTPoint(lat: "0.0", lon: "0.0", hae: "9999999.0", ce: "9999999.0", le: "9999999.0"))
 
         var cotDetail = COTDetail()
         
-        let messageID = sender
+        let remarksSource = "BAO.F.TAKTracker.\(from)"
         
-        let cotChat = COTChat(messageID: messageID)
+        let cotChat = COTChat(senderCallsign: from, messageID: messageID)
         let cotLink = COTLink(relation: "p-p", type: "a-f-G-U-C", uid: messageID)
-        let cotRemarks = COTRemarks(source: messageID, timestamp: Date().ISO8601Format(), message: message)
-        let cotServerDestination = COTServerDestination(destinations: "\(destinationUrl):tcp:\(messageID)")
+        let cotRemarks = COTRemarks(source: remarksSource, timestamp: Date().ISO8601Format(), message: message)
         
         cotDetail.childNodes.append(cotChat)
         cotDetail.childNodes.append(cotLink)
         cotDetail.childNodes.append(cotRemarks)
-        cotDetail.childNodes.append(cotServerDestination)
         
         cotEvent.childNodes.append(cotDetail)
         

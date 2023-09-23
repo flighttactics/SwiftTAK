@@ -8,11 +8,11 @@
 import Foundation
 
 public struct COTEmergency : COTNode {
-    var cancel: Bool
-    var type: EmergencyType
-    var callsign: String
+    public var cancel: Bool
+    public var type: EmergencyType
+    public var callsign: String
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<emergency " +
         "cancel='\(cancel.description)' " +
         "type='\(type)'>" +

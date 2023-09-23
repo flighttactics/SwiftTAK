@@ -8,11 +8,11 @@
 import Foundation
 
 public struct COTContact : COTNode {
-    var endpoint:String = "*:-1:stcp"
-    var phone:String = ""
-    var callsign:String
+    public var endpoint:String = "*:-1:stcp"
+    public var phone:String = ""
+    public var callsign:String
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<contact " +
         "endpoint='\(endpoint)' " +
         "phone='\(phone)' " +

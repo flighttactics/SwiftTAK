@@ -8,10 +8,10 @@
 import Foundation
 
 public struct COTTrack : COTNode {
-    var speed:String
-    var course:String
+    public var speed:String
+    public var course:String
     
-    func toXml() -> String {
+    public func toXml() -> String {
         return "<track " +
         "speed='\(speed)' " +
         "course='\(course)'" +
