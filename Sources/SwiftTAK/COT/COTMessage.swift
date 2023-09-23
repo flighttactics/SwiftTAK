@@ -102,4 +102,28 @@ public class COTMessage: NSObject {
         
         return "<?xml version=\"1.0\" standalone=\"yes\"?>" + cotEvent.toXml()
     }
+    
+    public func generateChatMessage(message: String, destinationUrl: String) -> String {
+        let cotType = "b-t-f"
+        let cotHow = "h-g-i-g-o"
+        var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: cotType, how: cotHow, time: Date(), start: Date(), stale: Date().addingTimeInterval(0))
+        
+        cotEvent.childNodes.append(COTPoint(lat: "0.0", lon: "0.0", hae: "9999999.0", ce: "9999999.0", le: "9999999.0"))
+
+        var cotDetail = COTDetail()
+        
+        let messageID = UUID().uuidString
+        
+        let cotChat = COTChat(messageID: messageID)
+        let cotLink = COTLink(relation: "p-p", type: "a-f-G-U-C", uid: messageID)
+        let cotRemarks = COTRemarks(source: messageID, timestamp: Date().ISO8601Format(), message: message)
+        let cotServerDestination = COTServerDestination(destinations: "\(destinationUrl):tcp:\(messageID)")
+        
+        cotDetail.childNodes.append(cotChat)
+        cotDetail.childNodes.append(cotLink)
+        cotDetail.childNodes.append(cotRemarks)
+        cotDetail.childNodes.append(cotServerDestination)
+        
+        return "<?xml version=\"1.0\" standalone=\"yes\"?>" + cotEvent.toXml()
+    }
 }
