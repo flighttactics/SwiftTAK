@@ -40,4 +40,14 @@ final class XMLTests: XCTestCase {
         let result = cotMessage!.generateEmergencyCOTXml(latitude: latitude, longitude: longitude, callSign: callSign, emergencyType: EmergencyType.Cancel, isCancelled: true)
         XCTAssert(result.contains("cancel='true'"), "Emergency cancelled status was not included")
     }
+    
+    func testGeneratingChatMessageWorks() throws {
+        let result = cotMessage!.generateChatMessage(message: "Hello, World", destinationUrl: "127.0.0.1:4242")
+        TAKLogger.debug(result)
+        XCTAssert(result.contains("_chat id='All Chat Rooms' chatroom='All Chat Rooms'"))
+        XCTAssert(result.contains("<chatgrp id='All Chat Rooms' uid0"))
+        XCTAssert(result.contains("remarks source"))
+        XCTAssert(result.contains("Hello, World"))
+        XCTAssert(result.contains("__serverdestination destinations='127.0.0.1:4242"))
+    }
 }

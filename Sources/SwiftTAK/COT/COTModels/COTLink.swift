@@ -14,7 +14,6 @@ public struct COTLink : COTNode {
     var type: String
     var uid: String
     var callsign: String = ""
-    var remarks: String = ""
     
     func toXml() -> String {
         return "<link " +
@@ -24,7 +23,6 @@ public struct COTLink : COTNode {
         "type='\(type)' " +
         "uid='\(uid)' " +
         "callsign='\(callsign)' " +
-        "remarks='\(remarks)'" +
         "></link>"
     }
 }

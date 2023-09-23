@@ -124,6 +124,8 @@ public class COTMessage: NSObject {
         cotDetail.childNodes.append(cotRemarks)
         cotDetail.childNodes.append(cotServerDestination)
         
+        cotEvent.childNodes.append(cotDetail)
+        
         return "<?xml version=\"1.0\" standalone=\"yes\"?>" + cotEvent.toXml()
     }
 }

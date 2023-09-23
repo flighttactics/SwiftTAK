@@ -13,7 +13,7 @@ public struct COTServerDestination : COTNode {
     
     func toXml() -> String {
         return "<__serverdestination " +
-        "destinations='\(destinations)" + 
+        "destinations='\(destinations)'" + 
         ">" +
         "</__serverdestination>"
     }
