@@ -13,6 +13,8 @@ public struct TAKConstants {
     public static let DEFAULT_WEB_PORT = "8443"
     public static let DEFAULT_STREAMING_PORT = "8089"
     public static let UDP_BROADCAST_PORT = "6969"
+    public static let CHAT_UDP_BROADCAST_PORT = "17012"
+    public static let CHAT_TCP_BROADCAST_PORT = "4242"
     
     // Paths
     public static let MANIFEST_FILE = "manifest.xml"
@@ -22,6 +24,7 @@ public struct TAKConstants {
     public static let CSR_PATH = "/Marti/api/tls/signClient/v2?clientUid=$UID&version=$VERSION"
     
     public static let UDP_BROADCAST_URL = "239.2.3.1"
+    public static let CHAT_UDP_BROADCAST_URL = "224.10.10.1"
     
     // Other constants
     public static let DEFAULT_CHATROOM_NAME = "All Chat Rooms"
