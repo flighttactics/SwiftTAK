@@ -7,6 +7,30 @@
 
 import Foundation
 
+public struct COTPositionInformation {
+    public init(cotType: String = COTMessage.DEFAULT_COT_TYPE, cotHow: String = COTMessage.DEFAULT_HOW, heightAboveElipsoid: Double = 999999.0, circularError: Double = 999999.0, linearError: Double = 999999.0, speed: Double = 0.0, course: Double = 0.0, latitude: Double = 0.0, longitude: Double = 0.0) {
+        self.cotType = cotType
+        self.cotHow = cotHow
+        self.heightAboveElipsoid = heightAboveElipsoid
+        self.circularError = circularError
+        self.linearError = linearError
+        self.speed = speed
+        self.course = course
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+    
+    public var cotType: String = COTMessage.DEFAULT_COT_TYPE
+    public var cotHow: String = COTMessage.DEFAULT_HOW
+    public var heightAboveElipsoid: Double = 999999.0
+    public var circularError: Double = 999999.0
+    public var linearError: Double = 999999.0
+    public var speed: Double = 0.0
+    public var course: Double = 0.0
+    public var latitude: Double = 0.0
+    public var longitude: Double = 0.0
+}
+
 public class COTMessage: NSObject {
     
     static public let DEFAULT_COT_TYPE = "a-f-G-U-C"
@@ -36,17 +60,19 @@ public class COTMessage: NSObject {
         super.init()
     }
     
-    public func generateEmergencyCOTXml(cotType: String = DEFAULT_COT_TYPE, heightAboveElipsoid: String = DEFAULT_ERROR_NUMBER,
-                                circularError: String = DEFAULT_ERROR_NUMBER,
-                                linearError: String = DEFAULT_ERROR_NUMBER,
-                                latitude: String,
-                                longitude: String,
+    public func generateEmergencyCOTXml(cotType: String = DEFAULT_COT_TYPE,
+                                positionInfo: COTPositionInformation,
                                 callSign: String,
                                 emergencyType: EmergencyType,
                                 isCancelled: Bool) -> String {
         let cotTimeout = 10.0
         let deviceID = deviceID
         let eventType = emergencyType.description
+        let heightAboveElipsoid: String = positionInfo.heightAboveElipsoid.description
+        let circularError: String = positionInfo.circularError.description
+        let linearError: String = positionInfo.linearError.description
+        let latitude: String = positionInfo.latitude.description
+        let longitude: String = positionInfo.longitude.description
         
         var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: eventType, how: "h-g-i-g-o", time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
         
@@ -67,17 +93,19 @@ public class COTMessage: NSObject {
     
     public func generateCOTXml(cotType: String = DEFAULT_COT_TYPE,
                                cotHow: String = DEFAULT_HOW,
-                               heightAboveElipsoid: String = DEFAULT_ERROR_NUMBER,
-                               circularError: String = DEFAULT_ERROR_NUMBER,
-                               linearError: String = DEFAULT_ERROR_NUMBER,
-                               latitude: String,
-                               longitude: String,
+                               positionInfo: COTPositionInformation,
                                callSign: String,
                                group: String,
                                role: String,
                                phoneBatteryStatus: String = "") -> String {
         let cotTimeout = staleTimeMinutes * 60.0
-        let deviceID = deviceID
+        let heightAboveElipsoid: String = positionInfo.heightAboveElipsoid.description
+        let circularError: String = positionInfo.circularError.description
+        let linearError: String = positionInfo.linearError.description
+        let latitude: String = positionInfo.latitude.description
+        let longitude: String = positionInfo.longitude.description
+        let speed: String = positionInfo.speed.description
+        let course: String = positionInfo.course.description
         
         var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: cotType, how: cotHow, time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
         
@@ -89,6 +117,7 @@ public class COTMessage: NSObject {
         cotDetail.childNodes.append(COTRemarks())
         cotDetail.childNodes.append(COTGroup(name: group, role: role))
         cotDetail.childNodes.append(COTUid(callsign: callSign))
+        cotDetail.childNodes.append(COTTrack(speed: speed, course: course))
         cotDetail.childNodes.append(COTTakV(device: phoneModel,
                                             platform: appPlatform,
                                             os: phoneOS,
@@ -106,7 +135,8 @@ public class COTMessage: NSObject {
     public func generateChatMessage(message: String,
                                     sender: String,
                                     receiver: String = TAKConstants.DEFAULT_CHATROOM_NAME,
-                                    destinationUrl: String) -> String {
+                                    destinationUrl: String,
+                                    positionInfo: COTPositionInformation = COTPositionInformation()) -> String {
         let cotType = "b-t-f"
         let cotHow = "h-g-i-g-o"
         let ONE_DAY = 60.0*60.0*24.0
@@ -121,7 +151,12 @@ public class COTMessage: NSObject {
         
         var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: eventUID, type: cotType, how: cotHow, time: eventTime, start: eventTime, stale: stale)
         
-        cotEvent.childNodes.append(COTPoint(lat: "0.0", lon: "0.0", hae: "9999999.0", ce: "9999999.0", le: "9999999.0"))
+        cotEvent.childNodes.append(COTPoint(
+            lat: positionInfo.latitude.description,
+            lon: positionInfo.longitude.description,
+            hae: positionInfo.heightAboveElipsoid.description,
+            ce: positionInfo.circularError.description,
+            le: positionInfo.linearError.description))
 
         var cotDetail = COTDetail()
         

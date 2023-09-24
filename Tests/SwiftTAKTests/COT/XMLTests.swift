@@ -12,8 +12,7 @@ import XCTest
 final class XMLTests: XCTestCase {
     
     var cotMessage: COTMessage?
-    let latitude = "0.0"
-    let longitude = "0.0"
+    let positionInfo = COTPositionInformation(latitude: 0.0, longitude: 0.0)
     let callSign = "TEST-1"
     let group = "Cyan"
     let role = "Team Member"
@@ -23,12 +22,12 @@ final class XMLTests: XCTestCase {
     }
     
     func testSendingEmptyBatteryStringDoesNotInsertBatteryStatus() throws {
-        let result = cotMessage!.generateCOTXml(latitude: latitude, longitude: longitude, callSign: callSign, group: group, role: role, phoneBatteryStatus: "")
+        let result = cotMessage!.generateCOTXml(positionInfo: positionInfo, callSign: callSign, group: group, role: role, phoneBatteryStatus: "")
         XCTAssert(!result.contains("battery"), "Battery Node was included with empty battery status")
     }
     
     func testGeneratingEmergencyAlertIncludesEmergencyNode() throws {
-        let result = cotMessage!.generateEmergencyCOTXml(latitude: latitude, longitude: longitude, callSign: callSign, emergencyType: EmergencyType.NineOneOne, isCancelled: false)
+        let result = cotMessage!.generateEmergencyCOTXml(positionInfo: positionInfo, callSign: callSign, emergencyType: EmergencyType.NineOneOne, isCancelled: false)
         TAKLogger.debug(result)
         XCTAssert(result.contains("<emergency"), "Emergency Node was not included")
         XCTAssert(result.contains("cancel='false'"), "Emergency cancelled status was not included")
@@ -37,7 +36,7 @@ final class XMLTests: XCTestCase {
     }
     
     func testGeneratingCancelledEmergencyProperlyAddsCancelledAttribute() throws {
-        let result = cotMessage!.generateEmergencyCOTXml(latitude: latitude, longitude: longitude, callSign: callSign, emergencyType: EmergencyType.Cancel, isCancelled: true)
+        let result = cotMessage!.generateEmergencyCOTXml(positionInfo: positionInfo, callSign: callSign, emergencyType: EmergencyType.Cancel, isCancelled: true)
         XCTAssert(result.contains("cancel='true'"), "Emergency cancelled status was not included")
     }
     
