@@ -9,13 +9,14 @@ import Foundation
 import ZIPFoundation
 
 public struct DataPackageContents {
-    public var userCertificate : Data = Data()
-    public var userCertificatePassword : String = ""
-    public var serverCertificate : Data = Data()
-    public var serverCertificatePassword : String = ""
-    public var serverURL : String = ""
-    public var serverPort : String = ""
-    public var serverProtocol : String = ""
+    public var rootFolder: String = ""
+    public var userCertificate: Data = Data()
+    public var userCertificatePassword: String = ""
+    public var serverCertificate: Data = Data()
+    public var serverCertificatePassword: String = ""
+    public var serverURL: String = ""
+    public var serverPort: String = ""
+    public var serverProtocol: String = ""
     
     public init() {}
 }
@@ -23,13 +24,14 @@ public struct DataPackageContents {
 public class DataPackageParser: NSObject {
     
     public var packageContents = DataPackageContents()
+    var archive: Archive?
     
     let MANIFEST_FILE = "manifest.xml"
     var dataPackageContents: [String] = []
     
     var archiveLocation: URL?
     
-    public init (fileLocation:URL) {
+    public init (fileLocation: URL) {
         TAKLogger.debug("[DataPackageParser]: Initializing")
         archiveLocation = fileLocation
         super.init()
@@ -37,6 +39,31 @@ public class DataPackageParser: NSObject {
     
     public func parse() {
         processArchive()
+    }
+    
+    func retrieveFileFromArchive(fileName: String) -> Data {
+        var fileLocation = fileName
+        
+        var fileData = Data()
+        guard let archive = archive else {
+            TAKLogger.error("[DataPackageParser]: retrieveFileFromArchive tried to retrieve from an invalid data package")
+            return fileData
+        }
+        
+        if(!packageContents.rootFolder.isEmpty &&
+           !fileLocation.contains(packageContents.rootFolder)) {
+            let root = packageContents.rootFolder
+            fileLocation = root.appending("/").appending(fileLocation)
+        }
+        
+        guard let fileEntry = archive[fileLocation]
+        else { TAKLogger.debug("[DataPackageParser]: file \(fileLocation) not found in archive"); return fileData }
+        
+        _ = try? archive.extract(fileEntry) { data in
+            fileData.append(data)
+        }
+
+        return fileData
     }
 
     func processArchive() {
@@ -46,36 +73,39 @@ public class DataPackageParser: NSObject {
             TAKLogger.error("[DataPackageParser]: Unable to access sourceURL variable \(String(describing: archiveLocation))")
             return
         }
+        
+        archive = Archive(url: sourceURL, accessMode: .read)
 
-        guard let archive = Archive(url: sourceURL, accessMode: .read)
+        guard archive != nil
         else {
             TAKLogger.error("[DataPackageParser]: Unable to access archive at location \(String(describing: archiveLocation))")
             return
         }
         
         TAKLogger.debug("[DataPackageParser]: Files in archive")
-        dataPackageContents = archive.map { entry in
+        dataPackageContents = archive!.map { entry in
             return entry.path
         }
         TAKLogger.debug("[DataPackageParser]: " + String(describing: dataPackageContents))
         
-        let prefsFile = retrievePrefsFile(archive: archive)
-        let prefs = parsePrefsFile(archive: archive, prefsFile: prefsFile)
-        storeUserCertificate(archive: archive, prefs: prefs)
-        storeServerCertificate(archive: archive, prefs: prefs)
+        let prefsFile = retrievePrefsFile(archive: archive!)
+        storeRootDirectory(prefsFileLocation: prefsFile)
+        let prefs = parsePrefsFile(archive: archive!, prefsFile: prefsFile)
+        storeUserCertificate(archive: archive!, prefs: prefs)
+        storeServerCertificate(archive: archive!, prefs: prefs)
         storePreferences(preferences: prefs)
         TAKLogger.debug("[DataPackageParser]: processArchive Complete")
     }
     
-    func storeUserCertificate(archive: Archive, prefs: TAKPreferences) {
-        let fileName = prefs.userCertificateFileName()
-        guard let certFile = archive[fileName]
-        else { TAKLogger.debug("[DataPackageParser]: userCertificate \(fileName) not found in archive"); return }
-
-        var certData = Data()
-        _ = try? archive.extract(certFile) { data in
-            certData.append(data)
+    func storeRootDirectory(prefsFileLocation: String) {
+        let prefsFileURL = URL(string: prefsFileLocation)
+        if(prefsFileURL != nil && prefsFileURL!.pathComponents.count > 1) {
+            packageContents.rootFolder = prefsFileURL!.pathComponents.first!
         }
+    }
+    
+    func storeUserCertificate(archive: Archive, prefs: TAKPreferences) {
+        let certData = retrieveFileFromArchive(fileName: prefs.userCertificateFileName())
         packageContents.userCertificate = certData
         TAKLogger.debug("[DataPackageParser]: Storing User Certificate")
         TAKLogger.debug("[DataPackageParser]: " + String(describing: certData))
@@ -84,15 +114,7 @@ public class DataPackageParser: NSObject {
     }
     
     func storeServerCertificate(archive: Archive, prefs: TAKPreferences) {
-        let fileName = prefs.serverCertificateFileName()
-        guard let certFile = archive[fileName]
-        else { TAKLogger.debug("[DataPackageParser]: serverCertificate \(fileName) not found in archive"); return }
-
-        var certData = Data()
-        _ = try? archive.extract(certFile) { data in
-            certData.append(data)
-        }
-        
+        let certData = retrieveFileFromArchive(fileName: prefs.serverCertificateFileName())
         packageContents.serverCertificate = certData
     }
     
@@ -107,14 +129,8 @@ public class DataPackageParser: NSObject {
     
     func parsePrefsFile(archive:Archive, prefsFile: String) -> TAKPreferences {
         let prefsParser = PreferencesParser()
-        
-        guard let prefFile = archive[prefsFile]
-        else { TAKLogger.debug("[DataPackageParser]: prefFile not in archive"); return prefsParser.preferences }
+        let prefData = retrieveFileFromArchive(fileName: prefsFile)
 
-        var prefData = Data()
-        _ = try? archive.extract(prefFile) { data in
-            prefData.append(data)
-        }
         let xmlParser = XMLParser(data: prefData)
         xmlParser.delegate = prefsParser
         xmlParser.parse()
@@ -129,13 +145,7 @@ public class DataPackageParser: NSObject {
         }) {
             prefsFile = prefFileLocation
         } else {
-            guard let takManifest = archive["manifest.xml"]
-            else { return prefsFile }
-
-            var manifestData = Data()
-            _ = try? archive.extract(takManifest) { data in
-                manifestData.append(data)
-            }
+            let manifestData = retrieveFileFromArchive(fileName: "manifest.xml")
             let xmlParser = XMLParser(data: manifestData)
             let manifestParser = ManifestParser()
             xmlParser.delegate = manifestParser

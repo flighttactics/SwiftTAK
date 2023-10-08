@@ -26,6 +26,10 @@ let package = Package(
             dependencies: ["ZIPFoundation"]),
         .testTarget(
             name: "SwiftTAKTests",
-            dependencies: ["SwiftTAK", "ZIPFoundation"]),
+            dependencies: ["SwiftTAK", "ZIPFoundation"],
+            resources: [
+                .process("TestAssets")
+            ]
+        ),
     ]
 )
