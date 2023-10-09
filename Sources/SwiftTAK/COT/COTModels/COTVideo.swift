@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  COTVideo.swift
 //  
 //
 //  Created by Cory Foy on 10/9/23.

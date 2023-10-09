@@ -1,5 +1,5 @@
 //
-//  XML.swift
+//  COTXMLHelper.swift
 //  
 //
 //  Created by Cory Foy on 9/18/23.
