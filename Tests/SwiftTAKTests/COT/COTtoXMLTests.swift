@@ -184,4 +184,14 @@ final class COToXMLTests: XCTestCase {
         
         XCTAssertEqual(expectedDoc, actualDoc)
     }
+    
+    func testCOTVideoToXML() throws {
+        let expected = "<__video uid='12345' url='https://video.example.com/stream/cam1'></__video>"
+        let cotVideo = COTVideo(url: "https://video.example.com/stream/cam1", uid: "12345")
+        
+        let expectedDoc = try XMLDocument(xmlString: expected)
+        let actualDoc = try XMLDocument(xmlString: cotVideo.toXml())
+        
+        XCTAssertEqual(expectedDoc, actualDoc)
+    }
 }
