@@ -24,20 +24,14 @@ public struct COTChat : COTNode {
     public var senderCallsign:String = ""
     public var messageID:String = UUID().uuidString
     
-    public func makeAttribute(attrName: String, attrVal: String) -> String {
-        if(attrVal.isEmpty) { return "" }
-        return "\(attrName)='\(attrVal)' "
-    }
-    
     public func toXml() -> String {
-        return "<__chat " +
-        makeAttribute(attrName: "id", attrVal: id) +
-        makeAttribute(attrName: "chatroom", attrVal: chatroom) +
-        makeAttribute(attrName: "groupOwner", attrVal: groupOwner) +
-        makeAttribute(attrName: "parent", attrVal: parent) +
-        makeAttribute(attrName: "senderCallsign", attrVal: senderCallsign) +
-        makeAttribute(attrName: "messageID", attrVal: messageID) +
-        ">" +
-        "</__chat>"
+        var attrs: [String:String] = [:]
+        attrs["id"] = id
+        attrs["chatroom"] = chatroom
+        attrs["groupOwner"] = groupOwner
+        attrs["parent"] = parent
+        attrs["senderCallsign"] = senderCallsign
+        attrs["messageID"] = messageID
+        return COTXMLHelper.generateXML(nodeName: "__chat", attributes: attrs, message: "")
     }
 }

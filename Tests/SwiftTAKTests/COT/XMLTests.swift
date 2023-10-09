@@ -23,21 +23,29 @@ final class XMLTests: XCTestCase {
     
     func testSendingEmptyBatteryStringDoesNotInsertBatteryStatus() throws {
         let result = cotMessage!.generateCOTXml(positionInfo: positionInfo, callSign: callSign, group: group, role: role, phoneBatteryStatus: "")
-        XCTAssert(!result.contains("battery"), "Battery Node was included with empty battery status")
+        let actualDoc = try XMLDocument(xmlString: result)
+        let batteryNode = try actualDoc.nodes(forXPath: "//status[@battery]")
+        XCTAssert(batteryNode.isEmpty, "Battery Node was included with empty battery status")
     }
     
     func testGeneratingEmergencyAlertIncludesEmergencyNode() throws {
         let result = cotMessage!.generateEmergencyCOTXml(positionInfo: positionInfo, callSign: callSign, emergencyType: EmergencyType.NineOneOne, isCancelled: false)
-        TAKLogger.debug(result)
-        XCTAssert(result.contains("<emergency"), "Emergency Node was not included")
-        XCTAssert(result.contains("cancel='false'"), "Emergency cancelled status was not included")
-        XCTAssert(result.contains("TEST-1-Alert"), "Alert callsign was not included")
-        XCTAssert(result.contains("relation='p-p'"), "Link relation was not included")
+        let actualDoc = try XMLDocument(xmlString: result)
+        let emergencyNode = try actualDoc.nodes(forXPath: "//emergency[@cancel='false']").first! as? XMLElement
+        let relationNode = try actualDoc.nodes(forXPath: "//link[@relation='p-p']")
+        let contactNode = try actualDoc.nodes(forXPath: "//contact").first! as? XMLElement
+
+        XCTAssert(emergencyNode != nil, "Emergency Node was not included")
+        XCTAssertEqual("TEST-1-Alert", contactNode!.attribute(forName: "callsign")?.stringValue, "Alert callsign was not included")
+        XCTAssertEqual(emergencyNode!.attribute(forName: "cancel")!.stringValue, "false")
+        XCTAssert(!relationNode.isEmpty, "Link relation was not included")
     }
     
     func testGeneratingCancelledEmergencyProperlyAddsCancelledAttribute() throws {
         let result = cotMessage!.generateEmergencyCOTXml(positionInfo: positionInfo, callSign: callSign, emergencyType: EmergencyType.Cancel, isCancelled: true)
-        XCTAssert(result.contains("cancel='true'"), "Emergency cancelled status was not included")
+        let actualDoc = try XMLDocument(xmlString: result)
+        let emergencyNode = try actualDoc.nodes(forXPath: "//emergency[@cancel='true']")
+        XCTAssert(!emergencyNode.isEmpty, "Emergency cancelled status was not included")
     }
     
     func testGeneratingChatMessageWorks() throws {
@@ -45,10 +53,18 @@ final class XMLTests: XCTestCase {
             message: "Hello, World",
             sender: "TEST-TRACKER",
             destinationUrl: "127.0.0.1:4242")
+        
         TAKLogger.debug(result)
-        XCTAssert(result.contains("_chat id='All Chat Rooms' chatroom='All Chat Rooms'"))
-        XCTAssert(result.contains("senderCallsign='TEST-TRACKER'"))
-        XCTAssert(result.contains("remarks source"))
-        XCTAssert(result.contains("Hello, World"))
+        
+        let actualDoc = try XMLDocument(xmlString: result)
+        let chatNode = try actualDoc.nodes(forXPath: "//__chat").first! as? XMLElement
+        let remarksNode = try actualDoc.nodes(forXPath: "//remarks").first! as? XMLElement
+        
+        XCTAssertEqual(chatNode!.attribute(forName: "id")!.stringValue, "All Chat Rooms")
+        XCTAssertEqual(chatNode!.attribute(forName: "chatroom")!.stringValue, "All Chat Rooms")
+        XCTAssertEqual(chatNode!.attribute(forName: "senderCallsign")!.stringValue, "TEST-TRACKER")
+        
+        XCTAssertEqual(remarksNode!.attribute(forName: "source")!.stringValue, "BAO.F.TAKTracker.TEST-TRACKER")
+        XCTAssertEqual(remarksNode!.stringValue, "Hello, World")
     }
 }

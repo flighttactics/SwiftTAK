@@ -15,8 +15,8 @@ public struct COTStatus : COTNode {
     public var battery:String
     
     public func toXml() -> String {
-        return "<status " +
-        "battery='\(battery)'" +
-        "></status>"
+        var attrs: [String:String] = [:]
+        attrs["battery"] = battery
+        return COTXMLHelper.generateXML(nodeName: "status", attributes: attrs, message: "")
     }
 }

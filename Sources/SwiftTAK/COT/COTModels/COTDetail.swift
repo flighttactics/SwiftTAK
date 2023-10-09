@@ -13,10 +13,11 @@ public struct COTDetail : COTNode {
     }
     
     public var childNodes:[COTNode] = []
-    
+
     public func toXml() -> String {
-        return "<detail>" +
-        childNodes.map { $0.toXml() }.joined() +
-        "</detail>"
+        return COTXMLHelper.generateXML(
+            nodeName: "detail",
+            attributes: [:],
+            childNodes: childNodes)
     }
 }

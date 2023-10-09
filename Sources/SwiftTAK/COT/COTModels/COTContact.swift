@@ -19,10 +19,10 @@ public struct COTContact : COTNode {
     public var callsign:String
     
     public func toXml() -> String {
-        return "<contact " +
-        "endpoint='\(endpoint)' " +
-        "phone='\(phone)' " +
-        "callsign='\(callsign)'" +
-        "></contact>"
+        var attrs: [String:String] = [:]
+        attrs["endpoint"] = endpoint
+        attrs["phone"] = phone
+        attrs["callsign"] = callsign
+        return COTXMLHelper.generateXML(nodeName: "contact", attributes: attrs, message: "")
     }
 }

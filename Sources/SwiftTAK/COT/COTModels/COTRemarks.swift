@@ -20,13 +20,9 @@ public struct COTRemarks : COTNode {
     public var message: String = ""
     
     public func toXml() -> String {
-        let sourceAttr = source.isEmpty ? "" : "source='\(source)' "
-        let timestampAttr = timestamp.isEmpty ? "" : "timestamp='\(timestamp)' "
-        return "<remarks " +
-        sourceAttr +
-        timestampAttr + 
-        ">" +
-        message +
-        "</remarks>"
+        var attrs: [String:String] = [:]
+        attrs["source"] = source
+        attrs["timestamp"] = timestamp
+        return COTXMLHelper.generateXML(nodeName: "remarks", attributes: attrs, message: message)
     }
 }

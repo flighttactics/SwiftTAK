@@ -17,9 +17,9 @@ public struct COTGroup : COTNode {
     public var role:String
     
     public func toXml() -> String {
-        return "<__group " +
-        "name='\(name)' " +
-        "role='\(role)'" +
-        "></__group>"
+        var attrs: [String:String] = [:]
+        attrs["name"] = name
+        attrs["role"] = role
+        return COTXMLHelper.generateXML(nodeName: "__group", attributes: attrs, message: "")
     }
 }

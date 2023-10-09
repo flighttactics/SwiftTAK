@@ -23,12 +23,12 @@ public struct COTPoint : COTNode {
     public var le:String
     
     public func toXml() -> String {
-        return "<point " +
-        "lat='\(lat)' " +
-        "lon='\(lon)' " +
-        "hae='\(hae)' " +
-        "ce='\(ce)' " +
-        "le='\(le)'" +
-        "></point>"
+        var attrs: [String:String] = [:]
+        attrs["lat"] = lat
+        attrs["lon"] = lon
+        attrs["hae"] = hae
+        attrs["ce"] = ce
+        attrs["le"] = le
+        return COTXMLHelper.generateXML(nodeName: "point", attributes: attrs, message: "")
     }
 }
