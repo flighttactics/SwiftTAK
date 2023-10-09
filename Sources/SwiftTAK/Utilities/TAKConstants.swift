@@ -102,3 +102,58 @@ public enum EmergencyType: String, CaseIterable, CustomStringConvertible, Identi
     
     public var id: Self { self }
 }
+
+public enum HowType: String, CaseIterable, Identifiable {
+    case HumanEstimated = "h-e"
+    case HumanCalculated = "h-c"
+    case HumanTranscribed = "h-t"
+    case HumanCutAndPaste = "h-p"
+    case HumanGIGO = "h-g-i-g-o"
+    case MachineGPSDerived = "m-g"
+    case MachineGPSDerivedAugmented = "m-g-n"
+    case MachineGPSDerivedDifferential = "m-g-d"
+    case MachineMensurated = "m-i"
+    case MachineMagnetic = "m-m"
+    case MachineIns = "m-n"
+    case MachineSimulated = "m-s"
+    case MachineConfigured = "m-c"
+    case MachineRelated = "m-r"
+    case MachinePassed = "m-p"
+    case MachineFused = "m-f"
+    case MachineAlgorithmic = "m-a"
+    case MachineLaserDesignated = "m-l"
+    case MachineRadioEPLRS = "m-R-e"
+    case MachineRadioPLRS = "m-R-p"
+    case MachineRadioDoppler = "m-R-d"
+    case MachineRadioVHF = "m-R-v"
+    case MachineRadioTadil = "m-R-t"
+    case MachineRadioTadilA = "m-R-t-a"
+    case MachineRadioTadilB = "m-R-t-b"
+    case MachineRadioTadilJ = "m-R-t-j"
+    
+    public var id: Self { self }
+}
+
+public enum LinkType: String, CaseIterable, Identifiable {
+    case ParentProducer = "p-p"
+    case ParentOwner = "p-o"
+    case ParentManager = "p-m"
+    case ParentLeader = "p-l"
+    case ChildCorrelated = "c-c"
+    case ChildFused = "c-f"
+    case ChildAlternate = "c-a"
+    case RefinementAmplification = "r-a"
+    case RefinementUrl = "r-u"
+    case TaskingObject = "t-o"
+    case TaskingIndirect = "t-i"
+    case TaskingSubject = "t-s"
+    case TaskingPreposition = "t-p"
+    case TaskingPrepositionAt = "t-p-a"
+    case TaskingPrepositionBy = "t-p-b"
+    case TaskingPrepositionWith = "t-p-w"
+    case TaskingPrepositionFrom = "t-p-f"
+    case TaskingPrepositionRegarding = "t-p-r"
+    case TaskingPrepositionVia = "t-p-v"
+    
+    public var id: Self { self }
+}

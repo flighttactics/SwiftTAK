@@ -25,13 +25,13 @@ public struct COTLink : COTNode {
     public var callsign: String = ""
     
     public func toXml() -> String {
-        return "<link " +
-        "parent_callsign='\(parentCallsign)' " +
-        "production_time='\(productionTime)' " +
-        "relation='\(relation)' " +
-        "type='\(type)' " +
-        "uid='\(uid)' " +
-        "callsign='\(callsign)' " +
-        "></link>"
+        var attrs: [String:String] = [:]
+        attrs["parent_callsign"] = parentCallsign
+        attrs["production_time"] = productionTime
+        attrs["relation"] = relation
+        attrs["type"] = type
+        attrs["uid"] = uid
+        attrs["callsign"] = callsign
+        return COTXMLHelper.generateXML(nodeName: "link", attributes: attrs, message: "")
     }
 }

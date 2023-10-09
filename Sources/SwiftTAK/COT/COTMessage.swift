@@ -33,8 +33,10 @@ public struct COTPositionInformation {
 
 public class COTMessage: NSObject {
     
+    static let XML_HEADER = "<?xml version=\"1.0\" standalone=\"yes\"?>"
     static public let DEFAULT_COT_TYPE = "a-f-G-U-C"
-    static public let DEFAULT_HOW = "m-g"
+    static public let DEFAULT_CHAT_COT_TYPE = "b-t-f"
+    static public let DEFAULT_HOW = HowType.MachineGPSDerived.rawValue
     static public let DEFAULT_ERROR_NUMBER = "999999.0"
     public let COT_EVENT_VERSION = "2.0"
     
@@ -74,7 +76,7 @@ public class COTMessage: NSObject {
         let latitude: String = positionInfo.latitude.description
         let longitude: String = positionInfo.longitude.description
         
-        var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: eventType, how: "h-g-i-g-o", time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
+        var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: eventType, how: HowType.HumanGIGO.rawValue, time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
         
         let cotPoint = COTPoint(lat: latitude, lon: longitude, hae: heightAboveElipsoid, ce: circularError, le: linearError)
         
@@ -82,13 +84,13 @@ public class COTMessage: NSObject {
         
         var cotDetail = COTDetail()
         
-        cotDetail.childNodes.append(COTLink(relation: "p-p", type: cotType, uid: deviceID))
+        cotDetail.childNodes.append(COTLink(relation: LinkType.ParentProducer.rawValue, type: cotType, uid: deviceID))
         cotDetail.childNodes.append(COTContact(callsign: "\(callSign)-Alert"))
         cotDetail.childNodes.append(COTEmergency(cancel: isCancelled, type: emergencyType, callsign: callSign))
                                     
         cotEvent.childNodes.append(cotDetail)
         
-        return "<?xml version=\"1.0\" standalone=\"yes\"?>" + cotEvent.toXml()
+        return COTMessage.XML_HEADER + cotEvent.toXml()
     }
     
     public func generateCOTXml(cotType: String = DEFAULT_COT_TYPE,
@@ -129,7 +131,7 @@ public class COTMessage: NSObject {
         cotEvent.childNodes.append(cotPoint)
         cotEvent.childNodes.append(cotDetail)
         
-        return "<?xml version=\"1.0\" standalone=\"yes\"?>" + cotEvent.toXml()
+        return COTMessage.XML_HEADER + cotEvent.toXml()
     }
     
     public func generateChatMessage(message: String,
@@ -137,8 +139,8 @@ public class COTMessage: NSObject {
                                     receiver: String = TAKConstants.DEFAULT_CHATROOM_NAME,
                                     destinationUrl: String,
                                     positionInfo: COTPositionInformation = COTPositionInformation()) -> String {
-        let cotType = "b-t-f"
-        let cotHow = "h-g-i-g-o"
+        let cotType = COTMessage.DEFAULT_CHAT_COT_TYPE
+        let cotHow = HowType.HumanGIGO.rawValue
         let ONE_DAY = 60.0*60.0*24.0
         let eventTime = Date()
         let stale = Date().addingTimeInterval(ONE_DAY)
@@ -163,7 +165,7 @@ public class COTMessage: NSObject {
         let remarksSource = "BAO.F.TAKTracker.\(from)"
         
         let cotChat = COTChat(senderCallsign: from, messageID: messageID)
-        let cotLink = COTLink(relation: "p-p", type: "a-f-G-U-C", uid: messageID)
+        let cotLink = COTLink(relation: LinkType.ParentProducer.rawValue, type: "a-f-G-U-C", uid: messageID)
         let cotRemarks = COTRemarks(source: remarksSource, timestamp: Date().ISO8601Format(), message: message)
         
         cotDetail.childNodes.append(cotChat)
@@ -172,6 +174,6 @@ public class COTMessage: NSObject {
         
         cotEvent.childNodes.append(cotDetail)
         
-        return "<?xml version=\"1.0\" standalone=\"yes\"?>" + cotEvent.toXml()
+        return COTMessage.XML_HEADER + cotEvent.toXml()
     }
 }

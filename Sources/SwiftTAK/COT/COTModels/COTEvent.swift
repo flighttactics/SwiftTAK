@@ -29,16 +29,18 @@ public struct COTEvent : COTNode {
     public var childNodes:[COTNode] = []
     
     public func toXml() -> String {
-        return "<event " +
-        "version='\(version)' " +
-        "uid='\(uid)' " +
-        "type='\(type)' " +
-        "how='\(how)' " +
-        "time='\(ISO8601DateFormatter().string(from: time))' " +
-        "start='\(ISO8601DateFormatter().string(from: start))' " +
-        "stale='\(ISO8601DateFormatter().string(from: stale))'" +
-        ">" +
-        childNodes.map { $0.toXml() }.joined() +
-        "</event>"
+        var attrs: [String:String] = [:]
+        attrs["version"] = version
+        attrs["uid"] = uid
+        attrs["type"] = type
+        attrs["how"] = how
+        attrs["time"] = ISO8601DateFormatter().string(from: time)
+        attrs["start"] = ISO8601DateFormatter().string(from: start)
+        attrs["stale"] = ISO8601DateFormatter().string(from: stale)
+        
+        return COTXMLHelper.generateXML(
+            nodeName: "event",
+            attributes: attrs,
+            childNodes: childNodes)
     }
 }

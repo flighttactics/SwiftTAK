@@ -21,11 +21,11 @@ public struct COTTakV : COTNode {
     public var version:String
     
     public func toXml() -> String {
-        return "<takv " +
-        "device='\(device)' " +
-        "platform='\(platform)' " +
-        "os='\(os)' " +
-        "version='\(version)'" +
-        "></takv>"
+        var attrs: [String:String] = [:]
+        attrs["device"] = device
+        attrs["platform"] = platform
+        attrs["os"] = os
+        attrs["version"] = version
+        return COTXMLHelper.generateXML(nodeName: "takv", attributes: attrs, message: "")
     }
 }

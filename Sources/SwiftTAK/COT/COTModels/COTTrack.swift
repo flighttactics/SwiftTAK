@@ -17,9 +17,9 @@ public struct COTTrack : COTNode {
     public var course:String
     
     public func toXml() -> String {
-        return "<track " +
-        "speed='\(speed)' " +
-        "course='\(course)'" +
-        "></track>"
+        var attrs: [String:String] = [:]
+        attrs["speed"] = speed
+        attrs["course"] = course
+        return COTXMLHelper.generateXML(nodeName: "track", attributes: attrs, message: "")
     }
 }

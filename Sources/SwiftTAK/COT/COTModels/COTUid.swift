@@ -15,8 +15,8 @@ public struct COTUid : COTNode {
     public var callsign:String
     
     public func toXml() -> String {
-        return "<uid " +
-        "Droid='\(callsign)'" +
-        "></uid>"
+        var attrs: [String:String] = [:]
+        attrs["Droid"] = callsign
+        return COTXMLHelper.generateXML(nodeName: "uid", attributes: attrs, message: "")
     }
 }

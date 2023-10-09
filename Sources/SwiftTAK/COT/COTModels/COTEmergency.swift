@@ -19,10 +19,9 @@ public struct COTEmergency : COTNode {
     public var callsign: String
     
     public func toXml() -> String {
-        return "<emergency " +
-        "cancel='\(cancel.description)' " +
-        "type='\(type)'>" +
-        callsign +
-        "</emergency>"
+        var attrs: [String:String] = [:]
+        attrs["cancel"] = cancel.description
+        attrs["type"] = type.description
+        return COTXMLHelper.generateXML(nodeName: "emergency", attributes: attrs, message: callsign)
     }
 }
