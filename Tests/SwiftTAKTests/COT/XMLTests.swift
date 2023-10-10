@@ -57,14 +57,14 @@ final class XMLTests: XCTestCase {
         TAKLogger.debug(result)
         
         let actualDoc = try XMLDocument(xmlString: result)
-        let chatNode = try actualDoc.nodes(forXPath: "//__chat").first! as? XMLElement
-        let remarksNode = try actualDoc.nodes(forXPath: "//remarks").first! as? XMLElement
+        let chatNode = try actualDoc.nodes(forXPath: "//__chat").first! as! XMLElement
+        let remarksNode = try actualDoc.nodes(forXPath: "//remarks").first! as! XMLElement
         
-        XCTAssertEqual(chatNode!.attribute(forName: "id")!.stringValue, "All Chat Rooms")
-        XCTAssertEqual(chatNode!.attribute(forName: "chatroom")!.stringValue, "All Chat Rooms")
-        XCTAssertEqual(chatNode!.attribute(forName: "senderCallsign")!.stringValue, "TEST-TRACKER")
+        XCTAssertEqual(chatNode.attribute(forName: "id")!.stringValue, "All Chat Rooms")
+        XCTAssertEqual(chatNode.attribute(forName: "chatroom")!.stringValue, "All Chat Rooms")
+        XCTAssertEqual(chatNode.attribute(forName: "senderCallsign")!.stringValue, "TEST-TRACKER")
         
-        XCTAssertEqual(remarksNode!.attribute(forName: "source")!.stringValue, "BAO.F.TAKTracker.TEST-TRACKER")
-        XCTAssertEqual(remarksNode!.stringValue, "Hello, World")
+        XCTAssertEqual(remarksNode.attribute(forName: "source")!.stringValue, "BAO.F.TAKTracker.TEST-TRACKER")
+        XCTAssertEqual(remarksNode.stringValue, "Hello, World")
     }
 }
