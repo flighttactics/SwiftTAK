@@ -135,7 +135,7 @@ final class InvalidDataPackageTests: DataPackageParserTests {
     }
 }
 
-class DataPackageParserTests: XCTestCase {
+class DataPackageParserTests: SwiftTAKTestCase {
     
     func dataPackageFilename() -> String {
         return ""
@@ -156,6 +156,7 @@ class DataPackageParserTests: XCTestCase {
         parser.parse()
         TAKLogger.debug(parser.packageContents.serverCertificate.count.description)
         TAKLogger.debug(Data().count.description)
+        TAKLogger.debug(parser.packageContents.serverCertificate.count.description)
         XCTAssertFalse(parser.packageContents.serverCertificate.isEmpty)
     }
     
