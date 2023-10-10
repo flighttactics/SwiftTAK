@@ -50,12 +50,18 @@ public class DataPackageParser: NSObject {
             return fileData
         }
         
-        if(!packageContents.rootFolder.isEmpty &&
-           !fileLocation.contains(packageContents.rootFolder)) {
-            let root = packageContents.rootFolder
-            fileLocation = root.appending("/").appending(fileLocation)
+        let pathComponents = fileLocation.split(separator: "/")
+        
+        if(!packageContents.rootFolder.isEmpty) {
+            if(pathComponents.count > 1 && pathComponents.first! == packageContents.rootFolder) {
+                TAKLogger.debug("[DataPackageParser]: Not applying a root folder since it appears to already be in place")
+            } else {
+                let root = packageContents.rootFolder
+                fileLocation = root.appending("/").appending(fileLocation)
+            }
         }
         
+        TAKLogger.debug("[DataPackageParser]: Attempting to load \(fileLocation) from archive")
         guard let fileEntry = archive[fileLocation]
         else { TAKLogger.debug("[DataPackageParser]: file \(fileLocation) not found in archive"); return fileData }
         
@@ -98,9 +104,9 @@ public class DataPackageParser: NSObject {
     }
     
     func storeRootDirectory(prefsFileLocation: String) {
-        let prefsFileURL = URL(string: prefsFileLocation)
-        if(prefsFileURL != nil && prefsFileURL!.pathComponents.count > 1) {
-            packageContents.rootFolder = prefsFileURL!.pathComponents.first!
+        let pathComponents = prefsFileLocation.split(separator: "/")
+        if(pathComponents.count > 1) {
+            packageContents.rootFolder = String(pathComponents.first!)
         }
     }
     
