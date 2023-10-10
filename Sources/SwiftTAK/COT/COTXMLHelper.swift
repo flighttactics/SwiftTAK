@@ -14,7 +14,7 @@ public class COTXMLHelper {
             if(attrPair.value.isEmpty && !includeEmptyAttributes) {
                 continue
             }
-            root.addAttribute(XMLNode.attribute(withName: attrPair.key, stringValue: attrPair.value) as! XMLNode)
+            root.addAttribute(XMLNode.attribute(withName: attrPair.key, stringValue: attrPair.value))
         }
         
         return root.xmlString
@@ -26,7 +26,7 @@ public class COTXMLHelper {
             if(attrPair.value.isEmpty && !includeEmptyAttributes) {
                 continue
             }
-            root.addAttribute(XMLNode.attribute(withName: attrPair.key, stringValue: attrPair.value) as! XMLNode)
+            root.addAttribute(XMLNode.attribute(withName: attrPair.key, stringValue: attrPair.value))
         }
 
         for node in childNodes {
@@ -41,10 +41,3 @@ public class COTXMLHelper {
         return root.xmlString
     }
 }
-
-//func testXmlBlah() {
-//    var root = XMLElement(name: "uid")
-//    root.addAttribute(XMLNode.attribute(withName: "Droid", stringValue: "TESTER-1") as! XMLNode)
-//    let doc = XMLDocument(rootElement: root)
-//    TAKLogger.debug(root.xmlString)
-//}

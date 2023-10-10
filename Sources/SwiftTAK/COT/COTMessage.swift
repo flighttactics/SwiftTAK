@@ -40,12 +40,13 @@ public class COTMessage: NSObject {
     static public let DEFAULT_ERROR_NUMBER = "999999.0"
     public let COT_EVENT_VERSION = "2.0"
     
-    var staleTimeMinutes : Double
-    var deviceID : String
-    var phoneModel : String
-    var appPlatform : String
-    var phoneOS : String
-    var appVersion : String
+    var staleTimeMinutes: Double
+    var deviceID: String
+    var phoneModel: String
+    var appPlatform: String
+    var phoneOS: String
+    var appVersion: String
+    var dateFormatter = ISO8601DateFormatter()
     
     public init(staleTimeMinutes: Double = 5.0,
          deviceID: String = UUID().uuidString,
@@ -166,7 +167,7 @@ public class COTMessage: NSObject {
         
         let cotChat = COTChat(senderCallsign: from, messageID: messageID)
         let cotLink = COTLink(relation: LinkType.ParentProducer.rawValue, type: "a-f-G-U-C", uid: messageID)
-        let cotRemarks = COTRemarks(source: remarksSource, timestamp: Date().ISO8601Format(), message: message)
+        let cotRemarks = COTRemarks(source: remarksSource, timestamp: dateFormatter.string(from: Date()), message: message)
         
         cotDetail.childNodes.append(cotChat)
         cotDetail.childNodes.append(cotLink)
