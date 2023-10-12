@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GeographicLib
 
 public enum SpeedUnit {
     case MetersPerSecond
@@ -90,7 +91,8 @@ public class Conversions {
     }
     
     public static func LatLongToMGRS(latitude: Double, longitude: Double) -> String {
-        return ""
+        return String(GeographicLib.GeoCoords(latitude, longitude, 0).MGRSRepresentation(0))
+        //return ""
     }
     
     public static func LatLonToDMS(latitude: Double) -> String {

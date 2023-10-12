@@ -5,6 +5,7 @@
 //  Created by Cory Foy on 9/18/23.
 //
 
+import GeographicLib
 import XCTest
 
 @testable import SwiftTAK
@@ -20,13 +21,13 @@ final class ConversionsTests: XCTestCase {
     let mockLongitude = -76.9953
     let mockSpeedMetersPerSecond = 30.0
     
-//    func testLatLongToMGRS() {
-//        let expected = "18S UJ 26938 05973"
-//        let coordinate = mockLocationCoordinate()
-//        let latitude = coordinate.latitude as Double
-//        let longitude = coordinate.longitude as Double
-//        XCTAssertEqual(expected, Converter.LatLongToMGRS(latitude: latitude, longitude: longitude))
-//    }
+    func testLatLongToMGRS() {
+        let expected = "18S UJ 26938 05973"
+        let latitude = mockLatitude
+        let longitude = mockLongitude
+        let actualFromLib = GeographicLib.GeoCoords(latitude, longitude, 0).MGRSRepresentation(0)
+        XCTAssertEqual(expected, Conversions.LatLongToMGRS(latitude: latitude, longitude: longitude))
+    }
     
     func testLatitudeToDMS() {
         let latitude = mockLatitude

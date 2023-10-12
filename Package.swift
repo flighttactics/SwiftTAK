@@ -1,4 +1,4 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -11,6 +11,9 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
+            name: "GeographicLib",
+            targets: ["GeographicLib"]),
+        .library(
             name: "SwiftTAK",
             targets: ["SwiftTAK"]),
     ],
@@ -20,15 +23,18 @@ let package = Package(
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
+        .target(name: "GeographicLib"),
         .target(
             name: "SwiftTAK",
-            dependencies: ["ZIPFoundation"]),
+            dependencies: ["GeographicLib", "ZIPFoundation"],
+            swiftSettings: [.interoperabilityMode(.Cxx)]),
         .testTarget(
             name: "SwiftTAKTests",
-            dependencies: ["SwiftTAK", "ZIPFoundation"],
+            dependencies: ["SwiftTAK"],
             resources: [
                 .process("TestAssets")
-            ]
+            ],
+            swiftSettings: [.interoperabilityMode(.Cxx)]
         ),
     ]
 )
