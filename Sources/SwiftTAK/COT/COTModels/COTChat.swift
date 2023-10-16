@@ -23,6 +23,7 @@ public struct COTChat : COTNode {
     public var parent:String = ""
     public var senderCallsign:String = ""
     public var messageID:String = UUID().uuidString
+    public var childNodes: [COTNode] = []
     
     public func toXml() -> String {
         var attrs: [String:String] = [:]
@@ -32,6 +33,6 @@ public struct COTChat : COTNode {
         attrs["parent"] = parent
         attrs["senderCallsign"] = senderCallsign
         attrs["messageID"] = messageID
-        return COTXMLHelper.generateXML(nodeName: "__chat", attributes: attrs, message: "")
+        return COTXMLHelper.generateXML(nodeName: "__chat", attributes: attrs, childNodes: childNodes)
     }
 }
