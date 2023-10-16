@@ -25,6 +25,10 @@ public struct COTChat : COTNode {
     public var messageID:String = UUID().uuidString
     public var childNodes: [COTNode] = []
     
+    public var chatGroup: COTChatGroup? {
+        get { return childNodes.first(where: { $0 as? COTChatGroup != nil }) as? COTChatGroup }
+    }
+    
     public func toXml() -> String {
         var attrs: [String:String] = [:]
         attrs["id"] = id

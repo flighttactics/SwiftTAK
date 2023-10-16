@@ -28,6 +28,14 @@ public struct COTEvent : COTNode {
     public var stale:Date
     public var childNodes:[COTNode] = []
     
+    public var detail: COTDetail? {
+        get { return childNodes.first(where: { $0 as? COTDetail != nil }) as? COTDetail }
+    }
+    
+    public var point: COTPoint? {
+        get { return childNodes.first(where: { $0 as? COTPoint != nil }) as? COTPoint }
+    }
+    
     public func toXml() -> String {
         var attrs: [String:String] = [:]
         attrs["version"] = version

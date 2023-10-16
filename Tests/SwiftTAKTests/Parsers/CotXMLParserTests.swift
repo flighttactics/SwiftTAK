@@ -34,140 +34,106 @@ final class CotXMLParserTests: SwiftTAKTestCase {
     func testParserBuildChatNodeProperly() {
         let expected = COTChat(id: "All Chat Rooms", chatroom: "All Chat Rooms", groupOwner: "false", parent: "RootContactGroup", senderCallsign: "TRACKER01", messageID: "f98d00f3-ac68-4c9c-9c4e-427e91ae800e")
         let cotEvent: COTEvent = CotXMLParser.cotXmlToEvent(cotXml: chatMessageXml)!
-        if(cotEvent.childNodes.count == 0) {
-            XCTFail("No Event Child Nodes Created")
-            return
-        }
-        let cotDetail = cotEvent.childNodes.first(where: { $0 as? COTDetail != nil }) as! COTDetail
-        TAKLogger.debug(cotDetail.toXml())
-        if(cotDetail.childNodes.count == 0) {
-            XCTFail("No Detail Child Nodes Created")
-            return
-        }
-        let actual = cotDetail.childNodes.first(where: { $0 as? COTChat != nil }) as! COTChat
+        let actual = cotEvent.detail?.chat
         
-        XCTAssertEqual(expected.id, actual.id)
-        XCTAssertEqual(expected.chatroom, actual.chatroom)
-        XCTAssertEqual(expected.groupOwner, actual.groupOwner)
-        XCTAssertEqual(expected.parent, actual.parent)
-        XCTAssertEqual(expected.senderCallsign, actual.senderCallsign)
-        XCTAssertEqual(expected.messageID, actual.messageID)
+        if(actual == nil) {
+            XCTFail("Chat Node not created")
+            return
+        }
+        
+        XCTAssertEqual(expected.id, actual!.id)
+        XCTAssertEqual(expected.chatroom, actual!.chatroom)
+        XCTAssertEqual(expected.groupOwner, actual!.groupOwner)
+        XCTAssertEqual(expected.parent, actual!.parent)
+        XCTAssertEqual(expected.senderCallsign, actual!.senderCallsign)
+        XCTAssertEqual(expected.messageID, actual!.messageID)
     }
     
     func testParserBuildChatGroupNodeProperly() {
         // <chatgrp uid0="ANDROID-f33ec5af20765447" uid1="All Chat Rooms" id="All Chat Rooms" />
         let expected = COTChatGroup(id: "All Chat Rooms", uid0: "ANDROID-f33ec5af20765447", uid1: "All Chat Rooms")
         let cotEvent: COTEvent = CotXMLParser.cotXmlToEvent(cotXml: chatMessageXml)!
-        if(cotEvent.childNodes.count == 0) {
-            XCTFail("No Event Child Nodes Created")
-            return
-        }
-        let cotDetail = cotEvent.childNodes.first(where: { $0 as? COTDetail != nil }) as! COTDetail
-        TAKLogger.debug(cotDetail.toXml())
-        if(cotDetail.childNodes.count == 0) {
-            XCTFail("No Detail Child Nodes Created")
-            return
-        }
-        let cotChat = cotDetail.childNodes.first(where: { $0 as? COTChat != nil }) as! COTChat
+        let actual = cotEvent.detail?.chat?.chatGroup
         
-        if(cotChat.childNodes.count == 0) {
-            XCTFail("No Chat Child Nodes Created")
+        if(actual == nil) {
+            XCTFail("ChatGroup Node not created")
             return
         }
         
-        let actual = cotChat.childNodes.first(where: { $0 as? COTChatGroup != nil }) as! COTChatGroup
-        
-        XCTAssertEqual(expected.id, actual.id)
-        XCTAssertEqual(expected.uid0, actual.uid0)
-        XCTAssertEqual(expected.uid1, actual.uid1)
+        XCTAssertEqual(expected.id, actual!.id)
+        XCTAssertEqual(expected.uid0, actual!.uid0)
+        XCTAssertEqual(expected.uid1, actual!.uid1)
     }
     
     func testParserBuildsLinkProperly() {
         let expected = COTLink(relation: "p-p", type: "a-f-G-U-C", uid: "ANDROID-f33ec5af20765447")
         let cotEvent: COTEvent = CotXMLParser.cotXmlToEvent(cotXml: chatMessageXml)!
-        if(cotEvent.childNodes.count == 0) {
-            XCTFail("No Event Child Nodes Created")
-            return
-        }
-        let cotDetail = cotEvent.childNodes.first(where: { $0 as? COTDetail != nil }) as! COTDetail
-        TAKLogger.debug(cotDetail.toXml())
-        if(cotDetail.childNodes.count == 0) {
-            XCTFail("No Detail Child Nodes Created")
-            return
-        }
-        let actual = cotDetail.childNodes.first(where: { $0 as? COTLink != nil }) as! COTLink
+        let actual = cotEvent.detail?.link
         
-        XCTAssertEqual(expected.relation, actual.relation)
-        XCTAssertEqual(expected.type, actual.type)
-        XCTAssertEqual(expected.uid, actual.uid)
+        if(actual == nil) {
+            XCTFail("Link Node not created")
+            return
+        }
+        
+        XCTAssertEqual(expected.relation, actual!.relation)
+        XCTAssertEqual(expected.type, actual!.type)
+        XCTAssertEqual(expected.uid, actual!.uid)
     }
     
     func testParserBuildsServerDestinationProperly() {
         let expected = COTServerDestination(destinations: "192.168.0.65:4242:tcp:ANDROID-f33ec5af20765447")
         let cotEvent: COTEvent = CotXMLParser.cotXmlToEvent(cotXml: chatMessageXml)!
-        if(cotEvent.childNodes.count == 0) {
-            XCTFail("No Event Child Nodes Created")
-            return
-        }
-        let cotDetail = cotEvent.childNodes.first(where: { $0 as? COTDetail != nil }) as! COTDetail
-        TAKLogger.debug(cotDetail.toXml())
-        if(cotDetail.childNodes.count == 0) {
-            XCTFail("No Detail Child Nodes Created")
-            return
-        }
-        let actual = cotDetail.childNodes.first(where: { $0 as? COTServerDestination != nil }) as! COTServerDestination
+        let actual = cotEvent.detail?.serverDestination
         
-        XCTAssertEqual(expected.destinations, actual.destinations)
+        if(actual == nil) {
+            XCTFail("ServerDestination Node not created")
+            return
+        }
+        
+        XCTAssertEqual(expected.destinations, actual!.destinations)
     }
     
     func testParserBuildsRemarksProperly() {
-        //<remarks source="BAO.F.ATAK.ANDROID-f33ec5af20765447" to="All Chat Rooms"
-        //time="2023-10-12T17:24:57.848Z">at LCC</remarks>
         let expected = COTRemarks(source: "BAO.F.ATAK.ANDROID-f33ec5af20765447", timestamp: "2023-10-12T17:24:57.848Z", message: "at LCC", to: "All Chat Rooms")
         let cotEvent: COTEvent = CotXMLParser.cotXmlToEvent(cotXml: chatMessageXml)!
-        if(cotEvent.childNodes.count == 0) {
-            XCTFail("No Event Child Nodes Created")
-            return
-        }
-        let cotDetail = cotEvent.childNodes.first(where: { $0 as? COTDetail != nil }) as! COTDetail
-        TAKLogger.debug(cotDetail.toXml())
-        if(cotDetail.childNodes.count == 0) {
-            XCTFail("No Detail Child Nodes Created")
-            return
-        }
-        let actual = cotDetail.childNodes.first(where: { $0 as? COTRemarks != nil }) as! COTRemarks
+        let actual = cotEvent.detail?.remarks
         
-        // TODO: Implement rest of COTRemarks
-        XCTAssertEqual(expected.source, actual.source)
-        XCTAssertEqual(expected.timestamp, actual.timestamp)
-        XCTAssertEqual(expected.message, actual.message)
-        XCTAssertEqual(expected.to, actual.to)
+        if(actual == nil) {
+            XCTFail("Remarks Node not created")
+            return
+        }
+
+        XCTAssertEqual(expected.source, actual!.source)
+        XCTAssertEqual(expected.timestamp, actual!.timestamp)
+        XCTAssertEqual(expected.message, actual!.message)
+        XCTAssertEqual(expected.to, actual!.to)
     }
     
     func testParserBuildsPointProperly() {
         let expected = COTPoint(lat: "35.047", lon: "-71.176", hae: "199.568", ce: "9.9", le: "9999999.0")
         let cotEvent: COTEvent = CotXMLParser.cotXmlToEvent(cotXml: chatMessageXml)!
-        if(cotEvent.childNodes.count == 0) {
-            XCTFail("No Child Nodes Created")
+        let actual = cotEvent.point
+        
+        if(actual == nil) {
+            XCTFail("Point Node not created")
             return
         }
-        let actual = cotEvent.childNodes.first(where: { $0 as? COTPoint != nil }) as! COTPoint
         
-        XCTAssertEqual(expected.lat, actual.lat)
-        XCTAssertEqual(expected.lon, actual.lon)
-        XCTAssertEqual(expected.hae, actual.hae)
-        XCTAssertEqual(expected.ce, actual.ce)
-        XCTAssertEqual(expected.le, actual.le)
+        XCTAssertEqual(expected.lat, actual!.lat)
+        XCTAssertEqual(expected.lon, actual!.lon)
+        XCTAssertEqual(expected.hae, actual!.hae)
+        XCTAssertEqual(expected.ce, actual!.ce)
+        XCTAssertEqual(expected.le, actual!.le)
     }
     
     func testParserBuildsDetailProperly() {
         let cotEvent: COTEvent = CotXMLParser.cotXmlToEvent(cotXml: chatMessageXml)!
-        if(cotEvent.childNodes.count == 0) {
-            XCTFail("No Child Nodes Created")
+        let actual = cotEvent.detail
+        
+        if(actual == nil) {
+            XCTFail("Detail Node not created")
             return
         }
-        let actual = cotEvent.childNodes.first(where: { $0 as? COTDetail != nil }) as? COTDetail
-        XCTAssertNotNil(actual, "No COTDetail node created")
     }
     
     func testParserBuildsEventAttrsProperly() {
