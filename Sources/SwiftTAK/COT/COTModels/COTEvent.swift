@@ -36,6 +36,10 @@ public struct COTEvent : COTNode {
         get { return childNodes.first(where: { $0 as? COTPoint != nil }) as? COTPoint }
     }
     
+    public var isChatMessage: Bool {
+        return detail?.chat != nil
+    }
+    
     public func toXml() -> String {
         var attrs: [String:String] = [:]
         attrs["version"] = version

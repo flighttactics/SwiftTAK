@@ -29,6 +29,10 @@ public struct COTPositionInformation {
     public var course: Double = 0.0
     public var latitude: Double = 0.0
     public var longitude: Double = 0.0
+    
+    public func isEmptyLocation() -> Bool {
+        return latitude == 0.0 && longitude == 0.0
+    }
 }
 
 public class COTMessage: NSObject {
@@ -138,7 +142,6 @@ public class COTMessage: NSObject {
     public func generateChatMessage(message: String,
                                     sender: String,
                                     receiver: String = TAKConstants.DEFAULT_CHATROOM_NAME,
-                                    destinationUrl: String,
                                     positionInfo: COTPositionInformation = COTPositionInformation()) -> String {
         let cotType = COTMessage.DEFAULT_CHAT_COT_TYPE
         let cotHow = HowType.HumanGIGO.rawValue
@@ -154,12 +157,14 @@ public class COTMessage: NSObject {
         
         var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: eventUID, type: cotType, how: cotHow, time: eventTime, start: eventTime, stale: stale)
         
-        cotEvent.childNodes.append(COTPoint(
-            lat: positionInfo.latitude.description,
-            lon: positionInfo.longitude.description,
-            hae: positionInfo.heightAboveElipsoid.description,
-            ce: positionInfo.circularError.description,
-            le: positionInfo.linearError.description))
+        if(!positionInfo.isEmptyLocation()) {
+            cotEvent.childNodes.append(COTPoint(
+                lat: positionInfo.latitude.description,
+                lon: positionInfo.longitude.description,
+                hae: positionInfo.heightAboveElipsoid.description,
+                ce: positionInfo.circularError.description,
+                le: positionInfo.linearError.description))
+        }
 
         var cotDetail = COTDetail()
         
@@ -168,6 +173,7 @@ public class COTMessage: NSObject {
         let cotChat = COTChat(senderCallsign: from, messageID: messageID)
         let cotLink = COTLink(relation: LinkType.ParentProducer.rawValue, type: "a-f-G-U-C", uid: messageID)
         let cotRemarks = COTRemarks(source: remarksSource, timestamp: dateFormatter.string(from: Date()), message: message)
+        let destination = COTServerDestination(destinations: <#T##String#>)
         
         cotDetail.childNodes.append(cotChat)
         cotDetail.childNodes.append(cotLink)

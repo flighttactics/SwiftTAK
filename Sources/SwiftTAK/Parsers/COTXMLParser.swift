@@ -7,7 +7,7 @@
 
 import Foundation
 
-class CotXMLParser: NSObject, XMLParserDelegate {
+public class COTXMLParser: NSObject, XMLParserDelegate {
     var cotEvent: COTEvent?
     var cotPoint: COTPoint?
     var cotDetail: COTDetail?
@@ -20,7 +20,7 @@ class CotXMLParser: NSObject, XMLParserDelegate {
 
     var currentElementName: String = ""
     
-    func parserDidEndDocument(_ parser: XMLParser) {
+    public func parserDidEndDocument(_ parser: XMLParser) {
         if(cotChatGroup != nil && cotChat != nil) {
             cotChat!.childNodes.append(cotChatGroup!)
         }
@@ -36,7 +36,7 @@ class CotXMLParser: NSObject, XMLParserDelegate {
         if(cotPoint != nil) { cotEvent!.childNodes.append(cotPoint!) }
     }
     
-    func parser(_ parser: XMLParser,
+    public func parser(_ parser: XMLParser,
         foundCharacters string: String
     ) {
         if (string.trimmingCharacters(in: .whitespacesAndNewlines) != "") {
@@ -47,7 +47,7 @@ class CotXMLParser: NSObject, XMLParserDelegate {
     }
 
     
-    func parser(
+    public func parser(
         _ parser: XMLParser,
         didStartElement elementName: String,
         namespaceURI: String?,
@@ -163,9 +163,9 @@ class CotXMLParser: NSObject, XMLParserDelegate {
         cotEvent = COTEvent(version: version, uid: uid, type: type, how: how, time: time, start: start, stale: stale)
     }
 
-    static func cotXmlToEvent(cotXml: String) -> COTEvent? {
+    public static func cotXmlToEvent(cotXml: String) -> COTEvent? {
         let xmlParser = XMLParser(data: Data(cotXml.utf8))
-        let eventParser = CotXMLParser()
+        let eventParser = COTXMLParser()
         xmlParser.delegate = eventParser
         xmlParser.parse()
         return eventParser.cotEvent

@@ -51,8 +51,7 @@ final class XMLTests: XCTestCase {
     func testGeneratingChatMessageWorks() throws {
         let result = cotMessage!.generateChatMessage(
             message: "Hello, World",
-            sender: "TEST-TRACKER",
-            destinationUrl: "127.0.0.1:4242")
+            sender: "TEST-TRACKER")
         
         TAKLogger.debug(result)
         
