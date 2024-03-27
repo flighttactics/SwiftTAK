@@ -52,7 +52,45 @@ class COTXMLParser {
         }
         
         if let cotDetail = cot["event"]["detail"].element {
-            let detail = COTDetail()
+            var detail = COTDetail()
+            
+            if let cotContact = cot["event"]["detail"]["contact"].element {
+                let contactAttributes = cotContact.allAttributes
+                let contact = COTContact(
+                    endpoint: contactAttributes["endpoint"]?.text ?? COTContact.DEFAULT_ENDPOINT,
+                    phone: contactAttributes["phone"]?.text ?? "",
+                    callsign: contactAttributes["callsign"]?.text ?? ""
+                )
+                
+                detail.childNodes.append(contact)
+            }
+            
+            if let cotRemarks = cot["event"]["detail"]["remarks"].element {
+                let remarksAttributes = cotRemarks.allAttributes
+                let remarks = COTRemarks(
+                    source: remarksAttributes["source"]?.text ?? "",
+                    timestamp: remarksAttributes["timestamp"]?.text ?? "",
+                    message: cotRemarks.text
+                )
+                
+                detail.childNodes.append(remarks)
+            }
+            
+            if let cotUid = cot["event"]["detail"]["uid"].element {
+                let uidAttributes = cotUid.allAttributes
+                var callsign = ""
+                if(uidAttributes["callsign"] != nil) {
+                    callsign = uidAttributes["callsign"]?.text ?? ""
+                } else {
+                    callsign = cot["event"]["detail"]["uid"]["Droid"].element?.text ?? ""
+                }
+                let uid = COTUid(
+                    callsign: callsign
+                )
+                
+                detail.childNodes.append(uid)
+            }
+            
             event.childNodes.append(detail)
         }
         //Under Detail: Chat, Link, Remarks, ServerDestination

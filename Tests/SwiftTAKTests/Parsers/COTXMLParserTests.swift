@@ -89,9 +89,32 @@ class COTXMLParserTests: SwiftTAKTestCase {
     }
     
     func testProperlyCreatesCOTDetailFromXML() {
-        let expected_detail = COTDetail()
         let event = parser.parse(CONTACT_EVENT)
         let actual_detail = event?.cotDetail
-        XCTAssertEqual(expected_detail, actual_detail)
+        XCTAssertNotNil(actual_detail)
+    }
+    
+    func testProperlyCreatesCOTContactFromXML() {
+        let expected_contact = COTContact(callsign: "T1")
+        let event = parser.parse(CONTACT_EVENT)
+        let detail = event?.cotDetail
+        let actual_contact = detail?.cotContact
+        XCTAssertEqual(expected_contact, actual_contact)
+    }
+    
+    func testProperlyCreatesCOTRemarksFromXML() {
+        let expected_remarks = COTRemarks(message: "CFRD: Tanker 1")
+        let event = parser.parse(CONTACT_EVENT)
+        let detail = event?.cotDetail
+        let actual_remarks = detail?.cotRemarks
+        XCTAssertEqual(expected_remarks, actual_remarks)
+    }
+    
+    func testProperlyCreatesCOTUIDFromXML() {
+        let expected_uid = COTUid(callsign: "T1")
+        let event = parser.parse(CONTACT_EVENT)
+        let detail = event?.cotDetail
+        let actual_uid = detail?.cotUid
+        XCTAssertEqual(expected_uid, actual_uid)
     }
 }
