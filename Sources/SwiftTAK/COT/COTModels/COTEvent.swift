@@ -17,15 +17,6 @@ public struct COTEvent : COTNode, Equatable {
         self.start = start
         self.stale = stale
         self.childNodes = childNodes
-//        self.childNodeStorage = childNodes
-        
-//        childNodeStorage.forEach {
-//            if($0 is COTDetail) {
-//                cotDetail = $0 as? COTDetail
-//            } else if($0 is COTPoint) {
-//                cotPoint = $0 as? COTPoint
-//            }
-//        }
     }
     
     public var version:String
@@ -36,19 +27,25 @@ public struct COTEvent : COTNode, Equatable {
     public var start:Date
     public var stale:Date
     public var childNodes: [COTNode] = []
-//    var childNodeStorage: [COTNode] = []
-//    public var childNodes:[COTNode] { return childNodeStorage }
-//    public var cotPoint: COTPoint?
-//    public var cotDetail: COTDetail?
-//    
-//    public func addChildNode(node: COTNode) {
-//        childNodeStorage.append(node)
-//        if(node is COTDetail) {
-//            self.cotDetail = $0 as? COTDetail
-//        } else if(node is COTPoint) {
-//            self.cotPoint = $0 as? COTPoint
-//        }
-//    }
+    public var cotPoint: COTPoint? {
+        var point: COTPoint?
+        childNodes.forEach {
+           if($0 is COTPoint) {
+               point = $0 as? COTPoint
+            }
+        }
+        return point
+    }
+    
+    public var cotDetail: COTDetail? {
+        var detail: COTDetail?
+        childNodes.forEach {
+           if($0 is COTDetail) {
+               detail = $0 as? COTDetail
+            }
+        }
+        return detail
+    }
     
     public func toXml() -> String {
         var attrs: [String:String] = [:]

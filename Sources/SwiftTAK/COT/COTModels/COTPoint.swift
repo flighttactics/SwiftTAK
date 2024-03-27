@@ -33,6 +33,11 @@ public struct COTPoint : COTNode, Equatable {
     }
     
     public static func == (lhs: COTPoint, rhs: COTPoint) -> Bool {
-        return true
+        return
+            lhs.lat == rhs.lat &&
+            lhs.lon == rhs.lon &&
+            lhs.hae == rhs.hae &&
+            lhs.ce == rhs.ce &&
+            lhs.le == rhs.le
     }
 }

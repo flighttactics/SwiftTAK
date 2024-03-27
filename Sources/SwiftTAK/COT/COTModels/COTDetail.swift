@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct COTDetail : COTNode {
+public struct COTDetail : COTNode, Equatable {
     public init(childNodes: [COTNode] = []) {
         self.childNodes = childNodes
     }
@@ -19,5 +19,10 @@ public struct COTDetail : COTNode {
             nodeName: "detail",
             attributes: [:],
             childNodes: childNodes)
+    }
+    
+    public static func == (lhs: COTDetail, rhs: COTDetail) -> Bool {
+        return
+            lhs.childNodes.count == rhs.childNodes.count
     }
 }

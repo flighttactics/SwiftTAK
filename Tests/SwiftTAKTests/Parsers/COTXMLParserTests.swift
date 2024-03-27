@@ -76,37 +76,22 @@ class COTXMLParserTests: SwiftTAKTestCase {
         XCTAssertEqual(expected_event, actual_event)
     }
     
-//    func testProperlyCreatesCOTPointFromXML() {
-//        let expected_point = COTPoint(
-//            lat: "35.91195",
-//            lon: "-79.07783",
-//            hae: "30.0",
-//            ce: "9999999.0",
-//            le: "9999999.0")
-//        let event = parser.parse(CONTACT_EVENT)
-//        let actual_point = event?.cotPoint
-//        XCTAssertEqual(expected_point, actual_point)
-//    }
+    func testProperlyCreatesCOTPointFromXML() {
+        let expected_point = COTPoint(
+            lat: "35.91195",
+            lon: "-79.07783",
+            hae: "30.0",
+            ce: "9999999.0",
+            le: "9999999.0")
+        let event = parser.parse(CONTACT_EVENT)
+        let actual_point = event?.cotPoint
+        XCTAssertEqual(expected_point, actual_point)
+    }
+    
+    func testProperlyCreatesCOTDetailFromXML() {
+        let expected_detail = COTDetail()
+        let event = parser.parse(CONTACT_EVENT)
+        let actual_detail = event?.cotDetail
+        XCTAssertEqual(expected_detail, actual_detail)
+    }
 }
-
-//class COTChatMessageParserTests: SwiftTAKTestCase {
-//    
-//    func dataPackageFilename() -> String {
-//        return ""
-//    }
-//    
-//    func loadParser(fileName: String, fileExtension: String) -> DataPackageParser {
-//        let archiveURL = Bundle.module.url(forResource: fileName, withExtension: fileExtension)!
-//        let parser = DataPackageParser.init(fileLocation: archiveURL)
-//        return parser
-//    }
-//    
-//    func testLoadsServerCertificate() {
-//        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
-//        parser.parse()
-//        TAKLogger.debug(parser.packageContents.serverCertificate.count.description)
-//        TAKLogger.debug(Data().count.description)
-//        TAKLogger.debug(parser.packageContents.serverCertificate.count.description)
-//        XCTAssertFalse(parser.packageContents.serverCertificate.isEmpty)
-//    }
-//}

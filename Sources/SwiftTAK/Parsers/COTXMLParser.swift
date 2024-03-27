@@ -39,7 +39,7 @@ class COTXMLParser {
                         stale: dateFormatter.date(from: eventAttributes["stale"]?.text ?? "") ?? Date())
         
         if let cotPoint = cot["event"]["point"].element {
-            let pointAttributes = cotEvent.allAttributes
+            let pointAttributes = cotPoint.allAttributes
             
             let point = COTPoint(
                 lat: pointAttributes["lat"]?.text ?? "0.0",
@@ -52,9 +52,9 @@ class COTXMLParser {
         }
         
         if let cotDetail = cot["event"]["detail"].element {
-            
+            let detail = COTDetail()
+            event.childNodes.append(detail)
         }
-        //Point, Detail
         //Under Detail: Chat, Link, Remarks, ServerDestination
         
         return event
