@@ -22,12 +22,15 @@ class COTXMLParser {
     }
     
     public func parse(_ cotxml: String) -> COTEvent? {
-        let cot = XMLHash.parse(cotxml)
+        let cot = XMLHash.config {
+            config in
+                config.detectParsingErrors = true
+        }.parse(cotxml)
         
         guard let cotEvent = cot["event"].element else {
             return nil
         }
-        
+
         let eventAttributes = cotEvent.allAttributes
         
         var event = COTEvent(version: eventAttributes["version"]?.text ?? "",
@@ -50,7 +53,6 @@ class COTXMLParser {
             
             event.childNodes.append(point)
         }
-        
         if let cotDetail = cot["event"]["detail"].element {
             var detail = COTDetail()
             
@@ -69,8 +71,9 @@ class COTXMLParser {
                 let remarksAttributes = cotRemarks.allAttributes
                 let remarks = COTRemarks(
                     source: remarksAttributes["source"]?.text ?? "",
-                    timestamp: remarksAttributes["timestamp"]?.text ?? "",
-                    message: cotRemarks.text
+                    timestamp: remarksAttributes["time"]?.text ?? "",
+                    message: cotRemarks.text,
+                    to: remarksAttributes["to"]?.text ?? ""
                 )
                 
                 detail.childNodes.append(remarks)
@@ -93,7 +96,6 @@ class COTXMLParser {
             
             event.childNodes.append(detail)
         }
-        //Under Detail: Chat, Link, Remarks, ServerDestination
         
         return event
     }

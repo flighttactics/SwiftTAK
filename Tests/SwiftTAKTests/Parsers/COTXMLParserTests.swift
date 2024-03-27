@@ -27,10 +27,8 @@ class COTXMLParserTests: SwiftTAKTestCase {
     
     let CHAT_EVENT: String = """
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <event version="2.0"
-        uid="GeoChat.9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A.All Chat Rooms.E0777F3F-671A-4ACC-AE33-D7D996C52004"
-        type="b-t-f" how="h-g-i-g-o" time="2024-03-18T01:40:56Z" start="2024-03-18T01:40:56Z"
-        stale="2024-03-18T01:42:56Z">
+    <event version="2.0" uid="GeoChat.9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A.All Chat Rooms.E0777F3F-671A-4ACC-AE33-D7D996C52004" type="b-t-f" how="h-g-i-g-o" time="2024-03-18T01:40:56Z"
+        start="2024-03-18T01:40:56Z" stale="2024-03-18T01:42:56Z">
         <point lat="36.04703336491824" lon="-79.17704832747502" hae="9999999.0" ce="9999999.0"
             le="9999999.0" />
         <detail>
@@ -48,7 +46,7 @@ class COTXMLParserTests: SwiftTAKTestCase {
             <_flow-tags_ TAK-Server-dd4055d128d5416e826423948c66e412="2024-03-18T01:40:56Z" />
         </detail>
     </event>
-"""
+    """
     
     let dateFormatter = ISO8601DateFormatter()
     let parser = COTXMLParser()
@@ -110,6 +108,14 @@ class COTXMLParserTests: SwiftTAKTestCase {
         XCTAssertEqual(expected_remarks, actual_remarks)
     }
     
+    func testProperlyCreatesChatStyleCOTRemarksFromXML() {
+        let expected_remarks = COTRemarks(source: "BAO.F.ATAK.9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A", timestamp: "2024-03-18T01:40:56Z", message: "Help world ", to: "All Chat Rooms")
+        let event = parser.parse(CHAT_EVENT)
+        let detail = event?.cotDetail
+        let actual_remarks = detail?.cotRemarks
+        XCTAssertEqual(expected_remarks, actual_remarks)
+    }
+    
     func testProperlyCreatesCOTUIDFromXML() {
         let expected_uid = COTUid(callsign: "T1")
         let event = parser.parse(CONTACT_EVENT)
@@ -117,4 +123,6 @@ class COTXMLParserTests: SwiftTAKTestCase {
         let actual_uid = detail?.cotUid
         XCTAssertEqual(expected_uid, actual_uid)
     }
+    
+    //Chat, Link, ServerDestination
 }
