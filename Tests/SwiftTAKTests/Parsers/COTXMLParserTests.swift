@@ -152,5 +152,27 @@ class COTXMLParserTests: SwiftTAKTestCase {
         XCTAssertEqual(expected, actual)
     }
     
+    func testProperlyCreatesCOTLinkFromXML() {
+        let expected = COTLink(
+            relation: "p-p",
+            type: "a-f-G-E-V-C",
+            uid: "9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A"
+        )
+        let event = parser.parse(CHAT_EVENT)
+        let detail = event?.cotDetail
+        let actual = detail?.cotLink
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testProperlyCreatesCOTServerDestinationFromXML() {
+        // <__serverdestination destinations="192.168.0.79:4242:tcp:9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A" />
+        let expected = COTServerDestination(destinations: "192.168.0.79:4242:tcp:9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A"
+        )
+        let event = parser.parse(CHAT_EVENT)
+        let detail = event?.cotDetail
+        let actual = detail?.cotServerDestination
+        XCTAssertEqual(expected, actual)
+    }
+    
     //Chat, Link, ServerDestination
 }

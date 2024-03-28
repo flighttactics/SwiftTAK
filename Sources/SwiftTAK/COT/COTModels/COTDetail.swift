@@ -52,6 +52,26 @@ public struct COTDetail : COTNode, Equatable {
         }
         return chat
     }
+    
+    public var cotLink: COTLink? {
+        var link: COTLink?
+        childNodes.forEach {
+           if($0 is COTLink) {
+               link = $0 as? COTLink
+            }
+        }
+        return link
+    }
+    
+    public var cotServerDestination: COTServerDestination? {
+        var serverDest: COTServerDestination?
+        childNodes.forEach {
+           if($0 is COTServerDestination) {
+               serverDest = $0 as? COTServerDestination
+            }
+        }
+        return serverDest
+    }
 
     public func toXml() -> String {
         return COTXMLHelper.generateXML(

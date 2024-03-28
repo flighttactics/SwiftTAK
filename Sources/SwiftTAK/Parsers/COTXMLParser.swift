@@ -118,6 +118,29 @@ class COTXMLParser {
                 detail.childNodes.append(chat)
             }
             
+            if let cotLink = cot["event"]["detail"]["link"].element {
+                let linkAttributes = cotLink.allAttributes
+                let link = COTLink(
+                    parentCallsign: linkAttributes["parent_callsign"]?.text ?? "",
+                    productionTime: linkAttributes["production_time"]?.text ?? "",
+                    relation: linkAttributes["relation"]?.text ?? "",
+                    type: linkAttributes["type"]?.text ?? "",
+                    uid: linkAttributes["uid"]?.text ?? UUID().uuidString,
+                    callsign: linkAttributes["callsign"]?.text ?? ""
+                )
+                
+                detail.childNodes.append(link)
+            }
+            
+            if let cotServerDestination = cot["event"]["detail"]["__serverdestination"].element {
+                let destinationAttributes = cotServerDestination.allAttributes
+                let destination = COTServerDestination(
+                    destinations: destinationAttributes["destinations"]?.text ?? ""
+                )
+                
+                detail.childNodes.append(destination)
+            }
+            
             event.childNodes.append(detail)
         }
         
