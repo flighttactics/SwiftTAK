@@ -94,6 +94,30 @@ class COTXMLParser {
                 detail.childNodes.append(uid)
             }
             
+            if let cotChat = cot["event"]["detail"]["__chat"].element {
+                let chatAttributes = cotChat.allAttributes
+                var chat = COTChat(
+                    id: chatAttributes["id"]?.text ?? COTChat.DEFAULT_CHATROOM,
+                    chatroom: chatAttributes["chatroom"]?.text ?? COTChat.DEFAULT_CHATROOM,
+                    groupOwner: chatAttributes["groupOwner"]?.text ?? "",
+                    parent: chatAttributes["parent"]?.text ?? "",
+                    senderCallsign: chatAttributes["senderCallsign"]?.text ?? "",
+                    messageID: chatAttributes["messageId"]?.text ?? UUID().uuidString
+                )
+                
+                if let cotChatGroup = cot["event"]["detail"]["__chat"]["chatgrp"].element {
+                    let chatGroupAttributes = cotChatGroup.allAttributes
+                    let chatGroup = COTChatGroup(
+                        uid0: chatGroupAttributes["uid0"]?.text ?? UUID().uuidString,
+                        uid1: chatGroupAttributes["uid1"]?.text ?? COTChatGroup.DEFAULT_CHATROOM,
+                        id: chatGroupAttributes["id"]?.text ?? COTChatGroup.DEFAULT_CHATROOM
+                    )
+                    chat.cotChatGroup = chatGroup
+                }
+                
+                detail.childNodes.append(chat)
+            }
+            
             event.childNodes.append(detail)
         }
         

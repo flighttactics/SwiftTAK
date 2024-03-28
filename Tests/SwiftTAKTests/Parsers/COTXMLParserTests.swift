@@ -124,5 +124,33 @@ class COTXMLParserTests: SwiftTAKTestCase {
         XCTAssertEqual(expected_uid, actual_uid)
     }
     
+    func testProperlyCreatesCOTChatFromXML() {
+        let expected = COTChat(
+            id: "All Chat Rooms",
+            chatroom: "All Chat Rooms",
+            groupOwner: "false",
+            parent: "RootContactGroup",
+            senderCallsign: "JEXAMPLE-IPHONE",
+            messageID: "E0777F3F-671A-4ACC-AE33-D7D996C52004"
+        )
+        let event = parser.parse(CHAT_EVENT)
+        let detail = event?.cotDetail
+        let actual = detail?.cotChat
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testProperlyCreatesCOTChatGroupFromXML() {
+        let expected = COTChatGroup(
+            uid0: "9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A",
+            uid1: "All Chat Rooms",
+            id: "All Chat Rooms"
+        )
+        let event = parser.parse(CHAT_EVENT)
+        let detail = event?.cotDetail
+        let chat = detail?.cotChat
+        let actual = chat?.cotChatGroup
+        XCTAssertEqual(expected, actual)
+    }
+    
     //Chat, Link, ServerDestination
 }

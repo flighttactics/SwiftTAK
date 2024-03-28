@@ -42,6 +42,16 @@ public struct COTDetail : COTNode, Equatable {
         }
         return uid
     }
+    
+    public var cotChat: COTChat? {
+        var chat: COTChat?
+        childNodes.forEach {
+           if($0 is COTChat) {
+               chat = $0 as? COTChat
+            }
+        }
+        return chat
+    }
 
     public func toXml() -> String {
         return COTXMLHelper.generateXML(
