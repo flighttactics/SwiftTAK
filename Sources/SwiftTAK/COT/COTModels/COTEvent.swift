@@ -28,23 +28,11 @@ public struct COTEvent : COTNode, Equatable {
     public var stale:Date
     public var childNodes: [COTNode] = []
     public var cotPoint: COTPoint? {
-        var point: COTPoint?
-        childNodes.forEach {
-           if($0 is COTPoint) {
-               point = $0 as? COTPoint
-            }
-        }
-        return point
+        return childNodes.first(where: { $0 is COTPoint }) as? COTPoint
     }
     
     public var cotDetail: COTDetail? {
-        var detail: COTDetail?
-        childNodes.forEach {
-           if($0 is COTDetail) {
-               detail = $0 as? COTDetail
-            }
-        }
-        return detail
+        return childNodes.first(where: { $0 is COTDetail }) as? COTDetail
     }
     
     public func toXml() -> String {
