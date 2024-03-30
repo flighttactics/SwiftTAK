@@ -8,7 +8,7 @@
 import Foundation
 
 public struct COTPositionInformation {
-    public init(cotType: String = COTMessage.DEFAULT_COT_TYPE, cotHow: String = COTMessage.DEFAULT_HOW, heightAboveElipsoid: Double = 999999.0, circularError: Double = 999999.0, linearError: Double = 999999.0, speed: Double = 0.0, course: Double = 0.0, latitude: Double = 0.0, longitude: Double = 0.0) {
+    public init(cotType: String = COTMessage.DEFAULT_COT_TYPE, cotHow: String = COTMessage.DEFAULT_HOW, heightAboveElipsoid: Double = COTPoint.DEFAULT_ERROR_VALUE, circularError: Double = COTPoint.DEFAULT_ERROR_VALUE, linearError: Double = COTPoint.DEFAULT_ERROR_VALUE, speed: Double = 0.0, course: Double = 0.0, latitude: Double = 0.0, longitude: Double = 0.0) {
         self.cotType = cotType
         self.cotHow = cotHow
         self.heightAboveElipsoid = heightAboveElipsoid
@@ -22,9 +22,9 @@ public struct COTPositionInformation {
     
     public var cotType: String = COTMessage.DEFAULT_COT_TYPE
     public var cotHow: String = COTMessage.DEFAULT_HOW
-    public var heightAboveElipsoid: Double = 999999.0
-    public var circularError: Double = 999999.0
-    public var linearError: Double = 999999.0
+    public var heightAboveElipsoid: Double = COTPoint.DEFAULT_ERROR_VALUE
+    public var circularError: Double = COTPoint.DEFAULT_ERROR_VALUE
+    public var linearError: Double = COTPoint.DEFAULT_ERROR_VALUE
     public var speed: Double = 0.0
     public var course: Double = 0.0
     public var latitude: Double = 0.0
@@ -37,7 +37,6 @@ public class COTMessage: NSObject {
     static public let DEFAULT_COT_TYPE = "a-f-G-U-C"
     static public let DEFAULT_CHAT_COT_TYPE = "b-t-f"
     static public let DEFAULT_HOW = HowType.MachineGPSDerived.rawValue
-    static public let DEFAULT_ERROR_NUMBER = "999999.0"
     public let COT_EVENT_VERSION = "2.0"
     
     var staleTimeMinutes: Double

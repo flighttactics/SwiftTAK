@@ -16,6 +16,8 @@ public struct COTPoint : COTNode, Equatable {
         self.le = le
     }
     
+    public static let DEFAULT_ERROR_VALUE = 9999999.0
+    
     public var lat:String
     public var lon:String
     public var hae:String

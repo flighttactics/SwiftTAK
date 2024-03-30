@@ -13,64 +13,24 @@ public struct COTDetail : COTNode, Equatable {
     }
     
     public var childNodes:[COTNode] = []
+    
     public var cotContact: COTContact? {
-        var contact: COTContact?
-        childNodes.forEach {
-           if($0 is COTContact) {
-               contact = $0 as? COTContact
-            }
-        }
-        return contact
+        return childNodes.first(where: { $0 is COTContact }) as? COTContact
     }
-    
     public var cotRemarks: COTRemarks? {
-        var remarks: COTRemarks?
-        childNodes.forEach {
-           if($0 is COTRemarks) {
-               remarks = $0 as? COTRemarks
-            }
-        }
-        return remarks
+        return childNodes.first(where: { $0 is COTRemarks }) as? COTRemarks
     }
-    
     public var cotUid: COTUid? {
-        var uid: COTUid?
-        childNodes.forEach {
-           if($0 is COTUid) {
-               uid = $0 as? COTUid
-            }
-        }
-        return uid
+        return childNodes.first(where: { $0 is COTUid }) as? COTUid
     }
-    
     public var cotChat: COTChat? {
-        var chat: COTChat?
-        childNodes.forEach {
-           if($0 is COTChat) {
-               chat = $0 as? COTChat
-            }
-        }
-        return chat
+        return childNodes.first(where: { $0 is COTChat }) as? COTChat
     }
-    
     public var cotLink: COTLink? {
-        var link: COTLink?
-        childNodes.forEach {
-           if($0 is COTLink) {
-               link = $0 as? COTLink
-            }
-        }
-        return link
+        return childNodes.first(where: { $0 is COTLink }) as? COTLink
     }
-    
     public var cotServerDestination: COTServerDestination? {
-        var serverDest: COTServerDestination?
-        childNodes.forEach {
-           if($0 is COTServerDestination) {
-               serverDest = $0 as? COTServerDestination
-            }
-        }
-        return serverDest
+        return childNodes.first(where: { $0 is COTServerDestination }) as? COTServerDestination
     }
 
     public func toXml() -> String {
