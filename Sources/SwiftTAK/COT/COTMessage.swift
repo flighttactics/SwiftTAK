@@ -166,7 +166,7 @@ public class COTMessage: NSObject {
         
         let cotChat = COTChat(senderCallsign: from, messageID: messageID)
         let cotLink = COTLink(relation: LinkType.ParentProducer.rawValue, type: "a-f-G-U-C", uid: messageID)
-        let cotRemarks = COTRemarks(source: remarksSource, timestamp: dateFormatter.string(from: Date()), message: message)
+        let cotRemarks = COTRemarks(source: remarksSource, timestamp: Date.now, message: message)
         
         cotDetail.childNodes.append(cotChat)
         cotDetail.childNodes.append(cotLink)

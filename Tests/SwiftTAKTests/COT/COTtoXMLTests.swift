@@ -125,9 +125,10 @@ final class COToXMLTests: XCTestCase {
     }
     
     func testCOTRemarksToXML() throws {
-        let timestamp = ISO8601DateFormatter().string(from: Date())
+        let ts_date = Date.now
+        let timestamp = ISO8601DateFormatter().string(from: ts_date)
         let expected = "<remarks source='BAO.F.TRACKER' timestamp='\(timestamp)' >Test Message</remarks>"
-        let cotRemarks = COTRemarks(source: "BAO.F.TRACKER", timestamp: timestamp, message: "Test Message")
+        let cotRemarks = COTRemarks(source: "BAO.F.TRACKER", timestamp: ts_date, message: "Test Message")
         
         let expectedDoc = try XMLDocument(xmlString: expected)
         let actualDoc = try XMLDocument(xmlString: cotRemarks.toXml())

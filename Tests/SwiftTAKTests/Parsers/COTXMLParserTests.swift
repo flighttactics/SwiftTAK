@@ -109,7 +109,8 @@ class COTXMLParserTests: SwiftTAKTestCase {
     }
     
     func testProperlyCreatesChatStyleCOTRemarksFromXML() {
-        let expected_remarks = COTRemarks(source: "BAO.F.ATAK.9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A", timestamp: "2024-03-18T01:40:56Z", message: "Help world ", to: "All Chat Rooms")
+        let expected_ts = ISO8601DateFormatter().date(from: "2024-03-18T01:40:56Z")
+        let expected_remarks = COTRemarks(source: "BAO.F.ATAK.9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A", timestamp: expected_ts!, message: "Help world ", to: "All Chat Rooms")
         let event = parser.parse(CHAT_EVENT)
         let detail = event?.cotDetail
         let actual_remarks = detail?.cotRemarks

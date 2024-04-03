@@ -10,15 +10,9 @@ import SWXMLHash
 
 class COTXMLParser {
     
-    let dateFormatter = ISO8601DateFormatter()
+    let dateParser = COTDateParser()
     
     public init() {
-        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        dateFormatter.formatOptions = [
-            .withFullDate,
-            .withFullTime,
-            .withDashSeparatorInDate,
-            .withFractionalSeconds]
     }
     
     public func parse(_ cotxml: String) -> COTEvent? {
@@ -52,9 +46,9 @@ class COTXMLParser {
                         uid: eventAttributes["uid"]?.text ?? "",
                         type: eventAttributes["type"]?.text ?? "",
                         how: eventAttributes["how"]?.text ?? "",
-                        time: dateFormatter.date(from: eventAttributes["time"]?.text ?? "") ?? Date(),
-                        start: dateFormatter.date(from: eventAttributes["start"]?.text ?? "") ?? Date(),
-                        stale: dateFormatter.date(from: eventAttributes["stale"]?.text ?? "") ?? Date())
+                        time: dateParser.parse(eventAttributes["time"]?.text ?? "") ?? Date(),
+                        start: dateParser.parse(eventAttributes["start"]?.text ?? "") ?? Date(),
+                        stale: dateParser.parse(eventAttributes["stale"]?.text ?? "") ?? Date())
     }
     
     func buildCOTPoint(cot: XMLIndexer) -> COTPoint? {
@@ -121,7 +115,7 @@ class COTXMLParser {
             let remarksAttributes = cotRemarks.allAttributes
             return COTRemarks(
                 source: remarksAttributes["source"]?.text ?? "",
-                timestamp: remarksAttributes["time"]?.text ?? "",
+                timestamp: dateParser.parse(remarksAttributes["time"]?.text ?? ""),
                 message: cotRemarks.text,
                 to: remarksAttributes["to"]?.text ?? ""
             )
