@@ -8,7 +8,7 @@
 import Foundation
 import SWXMLHash
 
-class COTXMLParser {
+public class COTXMLParser {
     
     let dateParser = COTDateParser()
     

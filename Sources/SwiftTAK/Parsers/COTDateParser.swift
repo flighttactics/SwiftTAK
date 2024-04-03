@@ -7,7 +7,7 @@
 
 import Foundation
 
-class COTDateParser {
+public class COTDateParser {
     public func parse(_ dateString: String) -> Date? {
         var parsedDate: Date? = nil
         let standardFormat = Date.ISO8601FormatStyle()
