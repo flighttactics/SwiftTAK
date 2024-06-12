@@ -8,12 +8,18 @@
 import Foundation
 import ZIPFoundation
 
+public struct TAKServerCertificatePackage {
+    public var certificateData: Data = Data()
+    public var certificatePassword: String = ""
+}
+
 public struct DataPackageContents {
     public var rootFolder: String = ""
     public var userCertificate: Data = Data()
     public var userCertificatePassword: String = ""
     public var serverCertificate: Data = Data()
     public var serverCertificatePassword: String = ""
+    public var serverCertificates: [TAKServerCertificatePackage] = []
     public var serverURL: String = ""
     public var serverPort: String = ""
     public var serverProtocol: String = ""
@@ -98,7 +104,7 @@ public class DataPackageParser: NSObject {
         storeRootDirectory(prefsFileLocation: prefsFile)
         let prefs = parsePrefsFile(archive: archive!, prefsFile: prefsFile)
         storeUserCertificate(archive: archive!, prefs: prefs)
-        storeServerCertificate(archive: archive!, prefs: prefs)
+        storeServerCertificates(archive: archive!, prefs: prefs)
         storePreferences(preferences: prefs)
         TAKLogger.debug("[DataPackageParser]: processArchive Complete")
     }
@@ -119,9 +125,64 @@ public class DataPackageParser: NSObject {
         TAKLogger.debug("[DataPackageParser]: User Certificate Stored")
     }
     
-    func storeServerCertificate(archive: Archive, prefs: TAKPreferences) {
-        let certData = retrieveFileFromArchive(fileName: prefs.serverCertificateFileName())
-        packageContents.serverCertificate = certData
+    func notHiddenFile(_ path: String) -> Bool {
+        // Some operating systems store hidden files in the zip
+        // These are identifiable because the filename starts with a dot
+        // The path might also start with a dot or a double underscore
+        // But we'll only look at the file name for now
+        let pathComponents = path.split(separator: "/")
+        guard let fileName = pathComponents.last else {
+            return !path.starts(with: ".")
+        }
+        return !fileName.starts(with: ".")
+    }
+    
+    func notUserIdentityCertificate(_ prefs: TAKPreferences, _ path: String) -> Bool {
+        let pathComponents = path.split(separator: "/")
+        guard let fileName = pathComponents.last else {
+            return !(path == prefs.userCertificateFileName())
+        }
+        return !(fileName == prefs.userCertificateFileName())
+    }
+    
+    func storeServerCertificates(archive: Archive, prefs: TAKPreferences) {
+        var didStoreAtLeastOneCertificate = false
+        prefs.serverCertificates.forEach { key, serverCert in
+            let certData = retrieveFileFromArchive(fileName: serverCert.certificateFileName)
+            if(!certData.isEmpty) {
+                didStoreAtLeastOneCertificate = true
+                let certPackage = TAKServerCertificatePackage(certificateData: certData, certificatePassword: serverCert.certificatePassword)
+                packageContents.serverCertificates.append(certPackage)
+                
+            }
+        }
+        
+        if(!didStoreAtLeastOneCertificate) {
+            // iTAK supports data packages where basically all p12 files
+            // that aren't the identity certificate are loaded as server certs
+            // even if they don't have a matching entry in the prefs file.
+            // In other words, having `certs/caCert.p12` as the CA location
+            // still loads something like `truststore-intermediate.p12` through *magic*
+            // Let's replicate that here
+            let p12Files = dataPackageContents.filter {
+                $0.hasSuffix(".p12") &&
+                notUserIdentityCertificate(prefs, $0) &&
+                notHiddenFile($0)
+            }
+            
+            if(!p12Files.isEmpty) {
+                p12Files.forEach { certPath in
+                    let serverCertData = retrieveFileFromArchive(fileName: certPath)
+                    
+                    // Since we have no idea what the password might be (because the file listed
+                    // in the prefs file isn't in the zip file) we'll attempt to grab the cert password
+                    // if there was one in the preferences file and use that
+                    let certPassword = prefs.serverCertificatePassword
+                    let certPackage = TAKServerCertificatePackage(certificateData: serverCertData, certificatePassword: certPassword)
+                    packageContents.serverCertificates.append(certPackage)
+                }
+            }
+        }
     }
     
     func storePreferences(preferences: TAKPreferences) {
