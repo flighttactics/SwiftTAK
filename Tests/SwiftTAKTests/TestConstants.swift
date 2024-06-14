@@ -14,12 +14,16 @@ public struct TestConstants {
     static let DP_SUBFOLDER_WITH_MANIFEST = "tak-subfolder-with-manifest-folder"
     static let DP_NO_MANIFEST = "tak-no-manifest"
     static let DP_INVALID_ZIP = "invalid-data-package-zip"
+    static let DP_ATAK_MULTI_CERT = "tak-multi-cert-atak-format"
+    static let DP_NON_MATCHING_CERT_NAME = "tak-non-matching-cert-name"
     static let DP_FILE_EXTENSION = "zip"
     
     // Data Package Testing Constants
     static let DP_SUBFOLDER_NAME = "rpi-tak"
     static let DP_SUBFOLDER_WITH_MANIFEST_NAME = "rpi-manifest"
     static let SERVER_CERTIFICATE_NAME = "truststore-intermediate"
+    static let ROOT_SERVER_CERTIFICATE_NAME = "truststore-root"
+    static let ROOT_SERVER_CERTFICATE_PASSWORD = "taktak"
     static let USER_CERTIFICATE_NAME = "user"
     static let PREF_FILE_NAME = "tak-server"
     static let CERTIFICATE_FILE_EXTENSION = "p12"

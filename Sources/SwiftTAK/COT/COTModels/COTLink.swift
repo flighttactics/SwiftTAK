@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct COTLink : COTNode {
+public struct COTLink : COTNode, Equatable {
     public init(parentCallsign: String = "", productionTime: String = "", relation: String, type: String, uid: String, callsign: String = "") {
         self.parentCallsign = parentCallsign
         self.productionTime = productionTime
@@ -33,5 +33,15 @@ public struct COTLink : COTNode {
         attrs["uid"] = uid
         attrs["callsign"] = callsign
         return COTXMLHelper.generateXML(nodeName: "link", attributes: attrs, message: "")
+    }
+    
+    public static func == (lhs: COTLink, rhs: COTLink) -> Bool {
+        return
+            lhs.uid == rhs.uid &&
+            lhs.relation == rhs.relation &&
+            lhs.type == rhs.type &&
+            lhs.callsign == rhs.callsign &&
+            lhs.productionTime == rhs.productionTime &&
+            lhs.parentCallsign == rhs.parentCallsign
     }
 }

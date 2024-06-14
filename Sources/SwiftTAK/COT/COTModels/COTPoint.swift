@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct COTPoint : COTNode {
+public struct COTPoint : COTNode, Equatable {
     public init(lat: String, lon: String, hae: String, ce: String, le: String) {
         self.lat = lat
         self.lon = lon
@@ -15,6 +15,8 @@ public struct COTPoint : COTNode {
         self.ce = ce
         self.le = le
     }
+    
+    public static let DEFAULT_ERROR_VALUE = 9999999.0
     
     public var lat:String
     public var lon:String
@@ -30,5 +32,14 @@ public struct COTPoint : COTNode {
         attrs["ce"] = ce
         attrs["le"] = le
         return COTXMLHelper.generateXML(nodeName: "point", attributes: attrs, message: "")
+    }
+    
+    public static func == (lhs: COTPoint, rhs: COTPoint) -> Bool {
+        return
+            lhs.lat == rhs.lat &&
+            lhs.lon == rhs.lon &&
+            lhs.hae == rhs.hae &&
+            lhs.ce == rhs.ce &&
+            lhs.le == rhs.le
     }
 }

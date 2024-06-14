@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct COTUid : COTNode {
+public struct COTUid : COTNode, Equatable {
     public init(callsign: String) {
         self.callsign = callsign
     }
@@ -18,5 +18,9 @@ public struct COTUid : COTNode {
         var attrs: [String:String] = [:]
         attrs["Droid"] = callsign
         return COTXMLHelper.generateXML(nodeName: "uid", attributes: attrs, message: "")
+    }
+    
+    public static func == (lhs: COTUid, rhs: COTUid) -> Bool {
+        return lhs.callsign == rhs.callsign
     }
 }

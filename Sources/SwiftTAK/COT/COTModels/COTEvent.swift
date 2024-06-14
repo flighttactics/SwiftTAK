@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct COTEvent : COTNode {
+public struct COTEvent : COTNode, Equatable {
     public init(version: String, uid: String, type: String, how: String, time: Date, start: Date, stale: Date, childNodes: [COTNode] = []) {
         self.version = version
         self.uid = uid
@@ -26,7 +26,14 @@ public struct COTEvent : COTNode {
     public var time:Date
     public var start:Date
     public var stale:Date
-    public var childNodes:[COTNode] = []
+    public var childNodes: [COTNode] = []
+    public var cotPoint: COTPoint? {
+        return childNodes.first(where: { $0 is COTPoint }) as? COTPoint
+    }
+    
+    public var cotDetail: COTDetail? {
+        return childNodes.first(where: { $0 is COTDetail }) as? COTDetail
+    }
     
     public func toXml() -> String {
         var attrs: [String:String] = [:]
@@ -42,5 +49,15 @@ public struct COTEvent : COTNode {
             nodeName: "event",
             attributes: attrs,
             childNodes: childNodes)
+    }
+    
+    public static func == (lhs: COTEvent, rhs: COTEvent) -> Bool {
+        return
+            lhs.uid == rhs.uid &&
+            lhs.type == rhs.type &&
+            lhs.how == rhs.how &&
+            lhs.time == rhs.time &&
+            lhs.start == rhs.start &&
+            lhs.stale == rhs.stale
     }
 }
