@@ -11,6 +11,8 @@ import ZIPFoundation
 public struct TAKServerCertificatePackage {
     public var certificateData: Data = Data()
     public var certificatePassword: String = ""
+
+    public init() {}
 }
 
 public struct DataPackageContents {
