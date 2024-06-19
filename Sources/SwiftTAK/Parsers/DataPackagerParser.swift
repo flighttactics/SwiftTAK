@@ -13,6 +13,11 @@ public struct TAKServerCertificatePackage {
     public var certificatePassword: String = ""
 
     public init() {}
+
+    public init(certificateData: Data, certificatePassword: String) {
+        self.certificateData = certificateData
+        self.certificatePassword = certificatePassword
+    }
 }
 
 public struct DataPackageContents {
