@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import SWXMLHash
 
 @testable import SwiftTAK
 
@@ -175,5 +176,68 @@ class COTXMLParserTests: SwiftTAKTestCase {
         XCTAssertEqual(expected, actual)
     }
     
-    //Chat, Link, ServerDestination
+    func testCOTArchiveFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><archive /></detail></event>
+"""
+        let expected = COTArchive()
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual = detail?.cotArchive
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testCOTUserIconFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><usericon iconsetpath="SOME_ID/vehicles/truck.png" /></detail></event>
+"""
+        let expected = COTUserIcon(iconsetPath: "SOME_ID/vehicles/truck.png")
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual = detail?.cotUserIcon
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testCOTColorFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><color argb="-42" /></detail></event>
+"""
+        let expected = COTColor(argb: -42)
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual = detail?.cotColor
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testCOTVideoFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><__video url="rtsp://localhost/myfeed" /></detail></event>
+"""
+        let expected = COTVideo(baseUrl: "rtsp://localhost/myfeed")
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual = detail?.cotVideo
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testCOTVideoConnectionInfoFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><__video url="localhost:8554/myfeed" uid="30f3c0c5-11ec-455d-bf0b-d93f1ad14716"><ConnectionEntry networkTimeout="12000" uid="30f3c0c5-11ec-455d-bf0b-d93f1ad14716" path="/myfeed" protocol="rtsp" bufferTime="-1" address="localhost" port="8554" roverPort="-1" rtspReliable="0" ignoreEmbeddedKLV="false" alias="My Cool Cam" /></video></detail></event>
+"""
+        let expectedConnectionEntry = COTConnectionEntry(uid: "30f3c0c5-11ec-455d-bf0b-d93f1ad14716", alias: "My Cool Cam", connectionProtocol: "rtsp", address: "localhost", port: 8554, path: "/myfeed", roverPort: -1, rtspReliable: 0, ignoreEmbeddedKLV: false, networkTimeout: 12000, bufferTime: -1)
+        let expectedVideo = COTVideo(baseUrl: "localhost:8554/myfeed", uid: "30f3c0c5-11ec-455d-bf0b-d93f1ad14716", connectionEntry: expectedConnectionEntry)
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual = detail?.cotVideo
+        XCTAssertEqual(expectedVideo, actual)
+    }
+    
+    func testArchiveNodeFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><archive></archive></detail></event>
+"""
+        let tree = XMLHash.parse(archiveXML)
+        XCTAssertNotNil(tree["event"]["detail"]["archive"].element)
+        XCTAssertNil(tree["event"]["detail"]["archive2"].element)
+    }
 }

@@ -188,7 +188,7 @@ final class COToXMLTests: XCTestCase {
     
     func testCOTVideoToXML() throws {
         let expected = "<__video uid='12345' url='https://video.example.com/stream/cam1'></__video>"
-        let cotVideo = COTVideo(url: "https://video.example.com/stream/cam1", uid: "12345")
+        let cotVideo = COTVideo(baseUrl: "https://video.example.com/stream/cam1", uid: "12345")
         
         let expectedDoc = try XMLDocument(xmlString: expected)
         let actualDoc = try XMLDocument(xmlString: cotVideo.toXml())

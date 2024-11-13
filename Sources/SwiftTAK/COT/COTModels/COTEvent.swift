@@ -7,6 +7,26 @@
 
 import Foundation
 
+// Note: There are other things that could be in the type field
+// see https://github.com/deptofdefense/AndroidTacticalAssaultKit-CIV/blob/22d11cba15dd5cfe385c0d0790670bc7e9ab7df4/atak/ATAK/app/src/main/java/com/atakmap/android/cot/CotMapAdapter.java#L263
+// we handle those by defaulting to CUSTOM but be aware if you're
+// doing your own processing
+public enum COTEventType: String {
+    case ATOM = "a"
+    case BIT = "b"
+    case TASKING = "t"
+    case CAPABILITY = "c"
+    // Note: The MITRE guide defines reservation *and* reply
+    // as both 'r' prefixes. However, the Types guide in the
+    // ATAK project defines 'r' as Reservation/Restriction/References
+    // and 'y' as Reply, so that's what we'll use here
+    case RESERVATION = "r"
+    case REPLY = "y"
+    // The ATAK project also shows examples with a 'u' prefix
+    // We'll just consider these as custom
+    case CUSTOM = "u"
+}
+
 public struct COTEvent : COTNode, Equatable {
     public init(version: String, uid: String, type: String, how: String, time: Date, start: Date, stale: Date, childNodes: [COTNode] = []) {
         self.version = version
@@ -33,6 +53,10 @@ public struct COTEvent : COTNode, Equatable {
     
     public var cotDetail: COTDetail? {
         return childNodes.first(where: { $0 is COTDetail }) as? COTDetail
+    }
+    
+    public var eventType: COTEventType {
+        COTEventType(rawValue: String(type.first ?? "u")) ?? COTEventType.CUSTOM
     }
     
     public func toXml() -> String {

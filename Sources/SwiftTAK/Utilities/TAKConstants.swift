@@ -10,7 +10,7 @@ import Foundation
 public struct TAKConstants {
     // Ports
     public static let DEFAULT_CSR_PORT = "8446"
-    public static let DEFAULT_WEB_PORT = "8443"
+    public static let DEFAULT_SECURE_API_PORT = "8443"
     public static let DEFAULT_STREAMING_PORT = "8089"
     public static let UDP_BROADCAST_PORT = "6969"
     public static let CHAT_UDP_BROADCAST_PORT = "17012"

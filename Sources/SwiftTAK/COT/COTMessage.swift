@@ -93,13 +93,13 @@ public class COTMessage: NSObject {
         return COTMessage.XML_HEADER + cotEvent.toXml()
     }
     
-    public func generateCOTXml(cotType: String = DEFAULT_COT_TYPE,
-                               cotHow: String = DEFAULT_HOW,
-                               positionInfo: COTPositionInformation,
-                               callSign: String,
-                               group: String,
-                               role: String,
-                               phoneBatteryStatus: String = "") -> String {
+    public func generateCOTEvent(cotType: String = DEFAULT_COT_TYPE,
+                                 cotHow: String = DEFAULT_HOW,
+                                 positionInfo: COTPositionInformation,
+                                 callSign: String,
+                                 group: String,
+                                 role: String,
+                                 phoneBatteryStatus: String = "") -> COTEvent {
         let cotTimeout = staleTimeMinutes * 60.0
         let heightAboveElipsoid: String = positionInfo.heightAboveElipsoid.description
         let circularError: String = positionInfo.circularError.description
@@ -130,8 +130,18 @@ public class COTMessage: NSObject {
         
         cotEvent.childNodes.append(cotPoint)
         cotEvent.childNodes.append(cotDetail)
+        return cotEvent
+    }
+    
+    public func generateCOTXml(cotType: String = DEFAULT_COT_TYPE,
+                               cotHow: String = DEFAULT_HOW,
+                               positionInfo: COTPositionInformation,
+                               callSign: String,
+                               group: String,
+                               role: String,
+                               phoneBatteryStatus: String = "") -> String {
         
-        return COTMessage.XML_HEADER + cotEvent.toXml()
+        return COTMessage.XML_HEADER + generateCOTEvent(cotType: cotType, cotHow: cotHow, positionInfo: positionInfo, callSign: callSign, group: group, role: role  , phoneBatteryStatus: phoneBatteryStatus).toXml()
     }
     
     public func generateChatMessage(message: String,

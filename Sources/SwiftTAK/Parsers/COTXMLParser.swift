@@ -8,6 +8,27 @@
 import Foundation
 import SWXMLHash
 
+public extension XMLAttribute? {
+    func toS() -> String {
+        return self?.text ?? ""
+    }
+    
+    func toI() -> Int {
+        let intString = self?.text ?? "0"
+        return Int(intString) ?? 0
+    }
+    
+    func toB() -> Bool {
+        let boolString = self?.text ?? "false"
+        switch(boolString) {
+        case "1", "true":
+            return true
+        default:
+            return false
+        }
+    }
+}
+
 public class COTXMLParser {
     
     let dateParser = COTDateParser()
@@ -93,7 +114,83 @@ public class COTXMLParser {
                 detail.childNodes.append(cotServerDestination)
             }
             
+            if let cotArchive = buildCOTArchive(cot: cot) {
+                detail.childNodes.append(cotArchive)
+            }
+            
+            if let cotUserIcon = buildCOTUserIcon(cot: cot) {
+                detail.childNodes.append(cotUserIcon)
+            }
+            
+            if let cotColor = buildCOTColor(cot: cot) {
+                detail.childNodes.append(cotColor)
+            }
+            
+            if let cotVideo = buildCOTVideo(cot: cot) {
+                detail.childNodes.append(cotVideo)
+            }
+            
             return detail
+        }
+        return nil
+    }
+    
+    func buildCOTVideo(cot: XMLIndexer) -> COTVideo? {
+        let cotVideoNode = cot["event"]["detail"]["__video"]
+        var connectionEntry: COTConnectionEntry? = nil
+        if let cotVideo = cotVideoNode.element {
+            if let cotConnectionEntry = cotVideoNode["ConnectionEntry"].element {
+                let connectionAttrs = cotConnectionEntry.allAttributes
+                connectionEntry = COTConnectionEntry(
+                    uid: connectionAttrs["uid"].toS(),
+                    alias: connectionAttrs["alias"].toS(),
+                    connectionProtocol: connectionAttrs["protocol"].toS(),
+                    address: connectionAttrs["address"].toS(),
+                    port: connectionAttrs["port"].toI(),
+                    path: connectionAttrs["path"].toS(),
+                    roverPort: connectionAttrs["roverPort"].toI(),
+                    rtspReliable: connectionAttrs["rtspReliable"].toI(),
+                    ignoreEmbeddedKLV: connectionAttrs["ignoreEmbeddedKLV"].toB(),
+                    networkTimeout: connectionAttrs["networkTimeout"].toI(),
+                    bufferTime: connectionAttrs["bufferTime"].toI())
+            }
+            let attributes = cotVideo.allAttributes
+            return COTVideo(
+                baseUrl: attributes["url"]?.text ?? "",
+                uid: attributes["uid"]?.text ?? "",
+                connectionEntry: connectionEntry
+            )
+        }
+        return nil
+    }
+    
+    func buildCOTUserIcon(cot: XMLIndexer) -> COTUserIcon? {
+        if let cotIcon = cot["event"]["detail"]["usericon"].element {
+            let iconAttributes = cotIcon.allAttributes
+            return COTUserIcon(
+                iconsetPath: iconAttributes["iconsetpath"]?.text ?? ""
+            )
+        }
+        return nil
+    }
+    
+    func buildCOTColor(cot: XMLIndexer) -> COTColor? {
+        if let cotIcon = cot["event"]["detail"]["color"].element {
+            let colorAttributes = cotIcon.allAttributes
+            let argbString = colorAttributes["argb"]?.text ?? ""
+            guard let argb = Int(argbString) else {
+                return nil
+            }
+            return COTColor(
+                argb: argb
+            )
+        }
+        return nil
+    }
+    
+    func buildCOTArchive(cot: XMLIndexer) -> COTArchive? {
+        if cot["event"]["detail"]["archive"].element != nil {
+            return COTArchive()
         }
         return nil
     }

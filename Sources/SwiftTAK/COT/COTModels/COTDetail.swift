@@ -32,6 +32,18 @@ public struct COTDetail : COTNode, Equatable {
     public var cotServerDestination: COTServerDestination? {
         return childNodes.first(where: { $0 is COTServerDestination }) as? COTServerDestination
     }
+    public var cotArchive: COTArchive? {
+        return childNodes.first(where: { $0 is COTArchive }) as? COTArchive
+    }
+    public var cotUserIcon: COTUserIcon? {
+        return childNodes.first(where: { $0 is COTUserIcon }) as? COTUserIcon
+    }
+    public var cotColor: COTColor? {
+        return childNodes.first(where: { $0 is COTColor }) as? COTColor
+    }
+    public var cotVideo: COTVideo? {
+        return childNodes.first(where: { $0 is COTVideo }) as? COTVideo
+    }
 
     public func toXml() -> String {
         return COTXMLHelper.generateXML(
