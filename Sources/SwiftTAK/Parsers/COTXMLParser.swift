@@ -90,6 +90,8 @@ public class COTXMLParser {
         if cot["event"]["detail"].element != nil {
             var detail = COTDetail()
             
+            detail.childNodes.append(contentsOf: buildCOTLinks(cot: cot))
+            
             if let cotContact = buildCOTContact(cot: cot) {
                 detail.childNodes.append(cotContact)
             }
@@ -104,10 +106,6 @@ public class COTXMLParser {
             
             if let cotChat = buildCOTChat(cot: cot) {
                 detail.childNodes.append(cotChat)
-            }
-            
-            if let cotLink = buildCOTLink(cot: cot) {
-                detail.childNodes.append(cotLink)
             }
             
             if let cotServerDestination = buildCOTServerDestination(cot: cot) {
@@ -130,7 +128,121 @@ public class COTXMLParser {
                 detail.childNodes.append(cotVideo)
             }
             
+            if let cotFillColor = buildCOTFillColor(cot: cot) {
+                detail.childNodes.append(cotFillColor)
+            }
+            
+            if let cotLabelsOn = buildCOTLabelsOn(cot: cot) {
+                detail.childNodes.append(cotLabelsOn)
+            }
+            
+            if let cotStrokeColor = buildCOTStrokeColor(cot: cot) {
+                detail.childNodes.append(cotStrokeColor)
+            }
+            
+            if let cotStrokeWeight = buildCOTStrokeWeight(cot: cot) {
+                detail.childNodes.append(cotStrokeWeight)
+            }
+            
+            if let cotShape = buildCOTShape(cot: cot) {
+                detail.childNodes.append(cotShape)
+            }
+            
+            if let cotGroup = buildCOTGroup(cot: cot) {
+                detail.childNodes.append(cotGroup)
+            }
+            
             return detail
+        }
+        return nil
+    }
+    
+    func buildCOTGroup(cot: XMLIndexer) -> COTGroup? {
+        if let cotGroup = cot["event"]["detail"]["__group"].element {
+            let groupAttrs = cotGroup.allAttributes
+            let name = groupAttrs["name"]?.text ?? ""
+            let role = groupAttrs["role"]?.text ?? ""
+            return COTGroup(name: name, role: role)
+        }
+        return nil
+    }
+    
+    func buildCOTShape(cot: XMLIndexer) -> COTShape? {
+        if cot["event"]["detail"]["shape"].element != nil {
+            var cotShape = COTShape()
+            if let cotEllipse = buildCOTEllipse(cot: cot) {
+                cotShape.childNodes.append(cotEllipse)
+            }
+            
+            return cotShape
+        }
+        return nil
+    }
+    
+    func buildCOTEllipse(cot: XMLIndexer) -> COTEllipse? {
+        if let cotEllipse = cot["event"]["detail"]["shape"]["ellipse"].element {
+            let ellipseAttrs = cotEllipse.allAttributes
+            let major = Double(ellipseAttrs["major"]?.text ?? "0.0") ?? 0.0
+            let minor = Double(ellipseAttrs["minor"]?.text ?? "0.0") ?? 0.0
+            let angle = Double(ellipseAttrs["angle"]?.text ?? "0.0") ?? 0.0
+            return COTEllipse(
+                major: major,
+                minor: minor,
+                angle: angle
+            )
+        }
+        return nil
+    }
+    
+    func buildCOTFillColor(cot: XMLIndexer) -> COTFillColor? {
+        if let cotFillColor = cot["event"]["detail"]["fillColor"].element {
+            let colorAttrs = cotFillColor.allAttributes
+            let valueString = colorAttrs["value"]?.text ?? ""
+            guard let value = Int(valueString) else {
+                return nil
+            }
+            return COTFillColor(
+                value: value
+            )
+        }
+        return nil
+    }
+    
+    func buildCOTLabelsOn(cot: XMLIndexer) -> COTLabelsOn? {
+        if let cotLabelsOn = cot["event"]["detail"]["labels_on"].element {
+            let labelsAttrs = cotLabelsOn.allAttributes
+            let valueString = labelsAttrs["value"]?.text ?? ""
+            return COTLabelsOn(
+                value: valueString == "true"
+            )
+        }
+        return nil
+    }
+    
+    func buildCOTStrokeColor(cot: XMLIndexer) -> COTStrokeColor? {
+        if let cotStrokeColor = cot["event"]["detail"]["strokeColor"].element {
+            let colorAttrs = cotStrokeColor.allAttributes
+            let valueString = colorAttrs["value"]?.text ?? ""
+            guard let value = Int(valueString) else {
+                return nil
+            }
+            return COTStrokeColor(
+                value: value
+            )
+        }
+        return nil
+    }
+    
+    func buildCOTStrokeWeight(cot: XMLIndexer) -> COTStrokeWeight? {
+        if let cotStrokeWeight = cot["event"]["detail"]["strokeWeight"].element {
+            let weightAttrs = cotStrokeWeight.allAttributes
+            let valueString = weightAttrs["value"]?.text ?? ""
+            guard let value = Double(valueString) else {
+                return nil
+            }
+            return COTStrokeWeight(
+                value: value
+            )
         }
         return nil
     }
@@ -263,19 +375,26 @@ public class COTXMLParser {
         return nil
     }
     
-    func buildCOTLink(cot: XMLIndexer) -> COTLink? {
-        if let cotLink = cot["event"]["detail"]["link"].element {
-            let linkAttributes = cotLink.allAttributes
-            return COTLink(
-                parentCallsign: linkAttributes["parent_callsign"]?.text ?? "",
-                productionTime: linkAttributes["production_time"]?.text ?? "",
-                relation: linkAttributes["relation"]?.text ?? "",
-                type: linkAttributes["type"]?.text ?? "",
-                uid: linkAttributes["uid"]?.text ?? UUID().uuidString,
-                callsign: linkAttributes["callsign"]?.text ?? ""
-            )
+    func buildCOTLinks(cot: XMLIndexer) -> [COTLink] {
+        let cotLinks = cot["event"]["detail"]["link"].all
+        var result: [COTLink] = []
+        cotLinks.forEach { link in
+            if let cotLink = link.element {
+                let linkAttributes = cotLink.allAttributes
+                let resultNode = COTLink(
+                    parentCallsign: linkAttributes["parent_callsign"]?.text ?? "",
+                    productionTime: linkAttributes["production_time"]?.text ?? "",
+                    relation: linkAttributes["relation"]?.text ?? "",
+                    type: linkAttributes["type"]?.text ?? "",
+                    uid: linkAttributes["uid"]?.text ?? "",
+                    callsign: linkAttributes["callsign"]?.text ?? "",
+                    remarks: linkAttributes["remarks"]?.text ?? "",
+                    point: linkAttributes["point"]?.text ?? ""
+                )
+                result.append(resultNode)
+            }
         }
-        return nil
+        return result
     }
     
     func buildCOTServerDestination(cot: XMLIndexer) -> COTServerDestination? {

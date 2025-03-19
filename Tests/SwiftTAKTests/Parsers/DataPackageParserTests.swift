@@ -142,6 +142,54 @@ final class DPAllFilesInSubfolderWithManifestTests: DataPackageParserTests {
     }
 }
 
+final class DPAllFilesInSubfolderWithManifestButNoPrefsFileTests: DataPackageParserTests {
+    override func dataPackageFilename() -> String {
+        TestConstants.DP_SUBFOLDER_NO_PREFS_WITH_MANIFEST
+    }
+    
+    override class var defaultTestSuite: XCTestSuite {
+        XCTestSuite(forTestCaseClass: Self.self)
+    }
+    
+    func testSetsBaseDirToFolderNameWhenFilesInSubfolderWithManifest() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertEqual(TestConstants.DP_SUBFOLDER_WITH_MANIFEST_NAME, parser.packageContents.rootFolder, "Root folder not set properly")
+    }
+    
+    // None of these will pass because there's no prefs file
+    override func testLoadsServerCertificatePassword() {}
+    override func testLoadsUserCertificate() {}
+    override func testLoadsUserCertificatePassword() {}
+    override func testLoadsServerURL() {}
+    override func testLoadsServerPort() {}
+    override func testLoadsServerProtocol() {}
+}
+
+final class DPAllFilesInSubfolderWithSpacesWithManifestButNoPrefsFileTests: DataPackageParserTests {
+    override func dataPackageFilename() -> String {
+        TestConstants.DP_SUBFOLDER_SPACES_NO_PREFS_WITH_MANIFEST
+    }
+    
+    override class var defaultTestSuite: XCTestSuite {
+        XCTestSuite(forTestCaseClass: Self.self)
+    }
+    
+    func testSetsBaseDirToFolderNameWhenFilesInSubfolderWithManifest() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertEqual(TestConstants.DP_SUBFOLDER_WITH_SPACES_NAME, parser.packageContents.rootFolder, "Root folder not set properly")
+    }
+    
+    // None of these will pass because there's no prefs file
+    override func testLoadsServerCertificatePassword() {}
+    override func testLoadsUserCertificate() {}
+    override func testLoadsUserCertificatePassword() {}
+    override func testLoadsServerURL() {}
+    override func testLoadsServerPort() {}
+    override func testLoadsServerProtocol() {}
+}
+
 final class InvalidDataPackageTests: DataPackageParserTests {
     override func dataPackageFilename() -> String {
         TestConstants.DP_INVALID_ZIP
@@ -202,6 +250,91 @@ final class InvalidDataPackageTests: DataPackageParserTests {
     }
 }
 
+final class LoadingOtherFilesFromPackageTests: DataPackageParserTests {
+    override func dataPackageFilename() -> String {
+        TestConstants.DP_MULTI_FILE_ZIP
+    }
+    
+    override class var defaultTestSuite: XCTestSuite {
+        XCTestSuite(forTestCaseClass: Self.self)
+    }
+    
+    func testAddsNonCertificateFilesToFileStore() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageFiles.count > 0)
+    }
+    
+    func testLoadsManifestConfigurationParameters() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertEqual(parser.packageConfiguration["uid"], "dc772639-f6f2-4bcc-88b5-1d841d91cd14")
+        XCTAssertEqual(parser.packageConfiguration["name"], "TAK Manifest Test")
+    }
+    
+    func testCapturesTheIgnoreFlag() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        let parsedFile = parser.packageFiles.first(where: {$0.fileLocation == "b442d62a63007b3f8562caeeb3bcbf37/startmap.kmz"})
+        XCTAssertNotNil(parsedFile)
+        XCTAssertFalse(parsedFile!.shouldIgnore)
+    }
+    
+    func testIncludesAllParametersForTheFile() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        let parsedFile = parser.packageFiles.first(where: {$0.fileLocation == "b442d62a63007b3f8562caeeb3bcbf37/startmap.kmz"})
+        XCTAssertNotNil(parsedFile)
+        XCTAssertEqual(parsedFile?.parameters["name"], "startmap.kmz")
+        XCTAssertEqual(parsedFile?.parameters["contentType"], "External GRG Data")
+        XCTAssertEqual(parsedFile?.parameters["visible"], "true")
+    }
+    
+    // This DP has no user or server certs in it, so override all these tests
+    // We do want to leave them to make sure that nothing crashes dealing with them
+    override func testLoadsServerCertificate() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverCertificates.isEmpty)
+    }
+    
+    override func testLoadsServerCertificatePassword() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverCertificates.isEmpty)
+    }
+    
+    override func testLoadsUserCertificate() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.userCertificate.isEmpty)
+    }
+    
+    override func testLoadsUserCertificatePassword() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.userCertificatePassword.isEmpty)
+    }
+    
+    override func testLoadsServerURL() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverURL.isEmpty)
+    }
+    
+    override func testLoadsServerPort() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverPort.isEmpty)
+    }
+    
+    override func testLoadsServerProtocol() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverProtocol.isEmpty)
+    }
+}
+
 class DataPackageParserTests: SwiftTAKTestCase {
     
     func dataPackageFilename() -> String {
@@ -227,7 +360,6 @@ class DataPackageParserTests: SwiftTAKTestCase {
     func testLoadsServerCertificatePassword() {
         let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
         parser.parse()
-        print(parser.packageContents.serverCertificates)
         XCTAssertTrue(
             [TestConstants.DEFAULT_CERT_PASSWORD, TestConstants.ROOT_SERVER_CERTFICATE_PASSWORD].contains(parser.packageContents.serverCertificates.first?.certificatePassword))
     }

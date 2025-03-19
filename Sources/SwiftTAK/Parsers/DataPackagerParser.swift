@@ -20,6 +20,15 @@ public struct TAKServerCertificatePackage {
     }
 }
 
+public struct DataPackageContentsFile {
+    public var shouldIgnore: Bool = false
+    public var fileLocation: String
+    public var parameters: [String:String] = [:]
+    public var fileName: String {
+        URL(string: fileLocation)?.lastPathComponent ?? fileLocation
+    }
+}
+
 public struct DataPackageContents {
     public var rootFolder: String = ""
     public var userCertificate: Data = Data()
@@ -37,16 +46,26 @@ public struct DataPackageContents {
 public class DataPackageParser: NSObject {
     
     public var packageContents = DataPackageContents()
+    public var packageFiles: [DataPackageContentsFile] = []
+    public var packageConfiguration: [String:String] = [:]
+    public var inMemory: Bool = true
     var archive: Archive?
+    var manifestParser: ManifestParser = ManifestParser()
+    var fileManager: FileManager = FileManager()
     
     let MANIFEST_FILE = "manifest.xml"
     var dataPackageContents: [String] = []
     
     var archiveLocation: URL?
+    var extractLocation: URL?
     
-    public init (fileLocation: URL) {
+    public init (fileLocation: URL, extractLocation: URL? = nil) {
         TAKLogger.debug("[DataPackageParser]: Initializing")
         archiveLocation = fileLocation
+        if extractLocation != nil {
+            inMemory = false
+            self.extractLocation = extractLocation
+        }
         super.init()
     }
     
@@ -54,32 +73,85 @@ public class DataPackageParser: NSObject {
         processArchive()
     }
     
+    func retrieveManifestFileFromArchive() -> Data {
+        if let manifestFileLocation = dataPackageContents.first(where: {
+            $0.lowercased().hasSuffix("manifest.xml")
+        }) {
+            return retrieveFileFromArchive(fileName: manifestFileLocation)
+        } else {
+            return Data()
+        }
+    }
+    
+    public func retrieveFileFromArchive(_ dataPackageFile: DataPackageContentsFile) -> Data {
+        return retrieveFileFromArchive(fileName: dataPackageFile.fileLocation)
+    }
+    
     func retrieveFileFromArchive(fileName: String) -> Data {
         var fileLocation = fileName
-        
         var fileData = Data()
-        guard let archive = archive else {
-            TAKLogger.error("[DataPackageParser]: retrieveFileFromArchive tried to retrieve from an invalid data package")
+        
+        guard !fileName.isEmpty else {
+            TAKLogger.debug("[DataPackageParser] Attempting to retrieve a file without a filename. Ignoring")
             return fileData
         }
-        
-        let pathComponents = fileLocation.split(separator: "/")
-        
-        if(!packageContents.rootFolder.isEmpty) {
-            if(pathComponents.count > 1 && pathComponents.first! == packageContents.rootFolder) {
-                TAKLogger.debug("[DataPackageParser]: Not applying a root folder since it appears to already be in place")
-            } else {
-                let root = packageContents.rootFolder
-                fileLocation = root.appending("/").appending(fileLocation)
+
+        if inMemory {
+            TAKLogger.debug("[DataPackageParser] Loading from an in-memory based data package")
+            guard let parsedArchive = archive else {
+                TAKLogger.error("[DataPackageParser]: retrieveFileFromArchive tried to retrieve from an invalid data package for \(fileName)")
+                return fileData
             }
-        }
-        
-        TAKLogger.debug("[DataPackageParser]: Attempting to load \(fileLocation) from archive")
-        guard let fileEntry = archive[fileLocation]
-        else { TAKLogger.debug("[DataPackageParser]: file \(fileLocation) not found in archive"); return fileData }
-        
-        _ = try? archive.extract(fileEntry) { data in
-            fileData.append(data)
+            
+            let pathComponents = fileLocation.split(separator: "/")
+            
+            if(!packageContents.rootFolder.isEmpty) {
+                if(pathComponents.count > 1 && pathComponents.first! == packageContents.rootFolder) {
+                    TAKLogger.debug("[DataPackageParser]: Not applying a root folder since it appears to already be in place")
+                } else {
+                    let root = packageContents.rootFolder
+                    fileLocation = root.appending("/").appending(fileLocation)
+                }
+            }
+            
+            TAKLogger.debug("[DataPackageParser]: Attempting to load \(fileLocation) from archive")
+            guard let fileEntry = parsedArchive[fileLocation] else {
+                let allPaths = parsedArchive.map { $0.path }.joined(separator: " | ")
+                TAKLogger.debug("[DataPackageParser]: file \(fileLocation) not found in archive with paths \(allPaths)")
+                return fileData
+            }
+            
+            _ = try? parsedArchive.extract(fileEntry) { data in
+                fileData.append(data)
+            }
+        } else {
+            TAKLogger.debug("[DataPackageParser] Loading from a file-system based data package")
+            guard let extractLocation = extractLocation else {
+                TAKLogger.error("[DataPackageParser] Marked as a file-system retrieval but no extract location found")
+                return fileData
+            }
+            
+            let pathComponents = fileLocation.split(separator: "/")
+            
+            if(!packageContents.rootFolder.isEmpty) {
+                if(pathComponents.count > 1 && pathComponents.first! == packageContents.rootFolder) {
+                    TAKLogger.debug("[DataPackageParser]: Not applying a root folder since it appears to already be in place")
+                } else {
+                    let root = packageContents.rootFolder
+                    fileLocation = root.appending("/").appending(fileLocation)
+                }
+            }
+            
+            let fileUrlString = "\(extractLocation.absoluteString)/\(fileLocation)"
+            guard let fileUrl = URL(string: fileUrlString) else {
+                TAKLogger.error("[DataPackageParser] Unable to create the file location URL from \(fileUrlString)")
+                return fileData
+            }
+            do {
+                try fileData.append(Data(contentsOf: fileUrl))
+            } catch {
+                TAKLogger.error("[DataPackageParser] Error reading file from \(fileUrlString): \(error)")
+            }
         }
 
         return fileData
@@ -93,37 +165,64 @@ public class DataPackageParser: NSObject {
             return
         }
         
-        archive = Archive(url: sourceURL, accessMode: .read)
-
-        guard archive != nil
-        else {
-            TAKLogger.error("[DataPackageParser]: Unable to access archive at location \(String(describing: archiveLocation))")
-            return
+        if !inMemory && extractLocation != nil {
+            TAKLogger.debug("[DataPackageParser] Processing as a file-system based data package")
+            do {
+                TAKLogger.debug("[DataPackageParser] Extracting to \(extractLocation!.relativePath)")
+                try fileManager.unzipItem(at: sourceURL, to: extractLocation!)
+                dataPackageContents = fileManager.subpaths(atPath: extractLocation!.relativePath) ?? []
+            } catch {
+                TAKLogger.error("[DataPackageParser] Unable to extract data package to \(extractLocation?.relativePath ?? "NO PATH"): \(error)")
+                return
+            }
+        } else {
+            TAKLogger.debug("[DataPackageParser] Processing as an in-memory data package")
+            guard let parsedArchive = Archive(url: sourceURL, accessMode: .read) else  {
+                TAKLogger.error("[DataPackageParser]: Unable to access archive at location \(String(describing: archiveLocation))")
+                return
+            }
+            
+            archive = parsedArchive
+            
+            TAKLogger.debug("[DataPackageParser]: Files in archive")
+            dataPackageContents = archive!.map { entry in
+                return entry.path
+            }
+            TAKLogger.debug("[DataPackageParser]: " + String(describing: dataPackageContents))
         }
-        
-        TAKLogger.debug("[DataPackageParser]: Files in archive")
-        dataPackageContents = archive!.map { entry in
-            return entry.path
-        }
-        TAKLogger.debug("[DataPackageParser]: " + String(describing: dataPackageContents))
-        
-        let prefsFile = retrievePrefsFile(archive: archive!)
-        storeRootDirectory(prefsFileLocation: prefsFile)
-        let prefs = parsePrefsFile(archive: archive!, prefsFile: prefsFile)
-        storeUserCertificate(archive: archive!, prefs: prefs)
-        storeServerCertificates(archive: archive!, prefs: prefs)
+        storeRootDirectory()
+        parseManifestFile()
+        let prefsFile = retrievePrefsFile()
+        let prefs = parsePrefsFile(prefsFile: prefsFile)
+        storeUserCertificate(prefs: prefs)
+        storeServerCertificates(prefs: prefs)
         storePreferences(preferences: prefs)
         TAKLogger.debug("[DataPackageParser]: processArchive Complete")
     }
     
-    func storeRootDirectory(prefsFileLocation: String) {
-        let pathComponents = prefsFileLocation.split(separator: "/")
-        if(pathComponents.count > 1) {
-            packageContents.rootFolder = String(pathComponents.first!)
+    func storeRootDirectory() {
+        if let manifestFileLocation = dataPackageContents.first(where: {
+            $0.lowercased().hasSuffix("manifest.xml")
+        }) {
+            let pathComponents = manifestFileLocation.split(separator: "/")
+            if(pathComponents.count > 2) {
+                TAKLogger.debug("[DataPackageParser] Setting root to \(String(pathComponents.first!)) (m1)")
+                packageContents.rootFolder = String(pathComponents.first!)
+            } else if (pathComponents.count > 1 && pathComponents.first!.lowercased() != "manifest") {
+                TAKLogger.debug("[DataPackageParser] Setting root to \(String(pathComponents.first!)) (m2)")
+                packageContents.rootFolder = String(pathComponents.first!)
+            }
+        } else {
+            let prefsFileLocation = retrievePrefsFile()
+            let pathComponents = prefsFileLocation.split(separator: "/")
+            if(pathComponents.count > 1) {
+                TAKLogger.debug("[DataPackageParser] Setting root to \(String(pathComponents.first!)) (p1)")
+                packageContents.rootFolder = String(pathComponents.first!)
+            }
         }
     }
     
-    func storeUserCertificate(archive: Archive, prefs: TAKPreferences) {
+    func storeUserCertificate(prefs: TAKPreferences) {
         let certData = retrieveFileFromArchive(fileName: prefs.userCertificateFileName())
         packageContents.userCertificate = certData
         TAKLogger.debug("[DataPackageParser]: Storing User Certificate")
@@ -152,7 +251,7 @@ public class DataPackageParser: NSObject {
         return !(fileName == prefs.userCertificateFileName())
     }
     
-    func storeServerCertificates(archive: Archive, prefs: TAKPreferences) {
+    func storeServerCertificates(prefs: TAKPreferences) {
         var didStoreAtLeastOneCertificate = false
         prefs.serverCertificates.forEach { key, serverCert in
             let certData = retrieveFileFromArchive(fileName: serverCert.certificateFileName)
@@ -201,7 +300,7 @@ public class DataPackageParser: NSObject {
         packageContents.serverProtocol = preferences.serverConnectionProtocol()
     }
     
-    func parsePrefsFile(archive:Archive, prefsFile: String) -> TAKPreferences {
+    func parsePrefsFile(prefsFile: String) -> TAKPreferences {
         let prefsParser = PreferencesParser()
         let prefData = retrieveFileFromArchive(fileName: prefsFile)
 
@@ -211,7 +310,19 @@ public class DataPackageParser: NSObject {
         return prefsParser.preferences
     }
     
-    func retrievePrefsFile(archive:Archive) -> String {
+    func parseManifestFile() {
+        TAKLogger.debug("[DataPackageParser] Attempting to parse manifest file")
+        let manifestData = retrieveManifestFileFromArchive()
+        TAKLogger.debug("[DataPackageParser] Manifest: \(manifestData)")
+        let xmlParser = XMLParser(data: manifestData)
+        let manifestParser = ManifestParser()
+        xmlParser.delegate = manifestParser
+        xmlParser.parse()
+        packageFiles = manifestParser.dataPackageFiles
+        packageConfiguration = manifestParser.manifestConfiguration
+    }
+    
+    func retrievePrefsFile() -> String {
         var prefsFile = ""
         
         if let prefFileLocation = dataPackageContents.first(where: {
@@ -219,12 +330,6 @@ public class DataPackageParser: NSObject {
         }) {
             prefsFile = prefFileLocation
         } else {
-            let manifestData = retrieveFileFromArchive(fileName: "manifest.xml")
-            let xmlParser = XMLParser(data: manifestData)
-            let manifestParser = ManifestParser()
-            xmlParser.delegate = manifestParser
-            xmlParser.parse()
-            TAKLogger.debug("[DataPackageParser]: Prefs file: \(manifestParser.prefsFile())")
             prefsFile = manifestParser.prefsFile()
         }
         return prefsFile

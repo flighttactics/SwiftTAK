@@ -154,18 +154,6 @@ class COTXMLParserTests: SwiftTAKTestCase {
         XCTAssertEqual(expected, actual)
     }
     
-    func testProperlyCreatesCOTLinkFromXML() {
-        let expected = COTLink(
-            relation: "p-p",
-            type: "a-f-G-E-V-C",
-            uid: "9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A"
-        )
-        let event = parser.parse(CHAT_EVENT)
-        let detail = event?.cotDetail
-        let actual = detail?.cotLink
-        XCTAssertEqual(expected, actual)
-    }
-    
     func testProperlyCreatesCOTServerDestinationFromXML() {
         // <__serverdestination destinations="192.168.0.79:4242:tcp:9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A" />
         let expected = COTServerDestination(destinations: "192.168.0.79:4242:tcp:9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A"
@@ -240,4 +228,92 @@ class COTXMLParserTests: SwiftTAKTestCase {
         XCTAssertNotNil(tree["event"]["detail"]["archive"].element)
         XCTAssertNil(tree["event"]["detail"]["archive2"].element)
     }
+    
+    func testProperlyCreatesCOTLinksFromXML() {
+        let expected = COTLink(
+            relation: "p-p",
+            type: "a-f-G-E-V-C",
+            uid: "9AEDF55F-FB33-44FD-9BF9-3F51605ADF6A"
+        )
+        let event = parser.parse(CHAT_EVENT)
+        let detail = event?.cotDetail
+        let actual = detail?.cotLinks?.first
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testProperlyCreatesMultipleCOTLinksFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><link point='38.838231810315555,-77.06616468204862' /><link point='38.83745360129687,-77.06579790102278' /></detail></event>
+"""
+        let expected1 = COTLink(
+            point: "38.838231810315555,-77.06616468204862"
+        )
+        let expected2 = COTLink(
+            point: "38.83745360129687,-77.06579790102278"
+        )
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual1 = detail?.cotLinks?.first
+        let actual2 = detail?.cotLinks?.last
+        XCTAssertEqual(expected1, actual1)
+        XCTAssertEqual(expected2, actual2)
+    }
+    
+    func testCOTFillColorFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><fillColor value='-324'/></detail></event>
+"""
+        let expected = COTFillColor(value: -324)
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual = detail?.cotFillColor
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testCOTLabelsOnFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><labels_on value='false'/></detail></event>
+"""
+        let expected = COTLabelsOn(value: false)
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual = detail?.cotLabelsOn
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testCOTStrokeColorFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><strokeColor value='324'/></detail></event>
+"""
+        let expected = COTStrokeColor(value: 324)
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual = detail?.cotStrokeColor
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testCOTStrokeWeightFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><strokeWeight value='4.0'/></detail></event>
+"""
+        let expected = COTStrokeWeight(value: 4.0)
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let actual = detail?.cotStrokeWeight
+        XCTAssertEqual(expected, actual)
+    }
+    
+    func testCOTShapeFromXML() {
+        let archiveXML = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><event><detail><shape><ellipse major='226.98412686380018' minor='226.98412686380018' angle='360'/></shape></detail></event>
+"""
+        
+        let expected = COTEllipse(major: 226.98412686380018, minor: 226.98412686380018, angle: 360)
+        let event = parser.parse(archiveXML)
+        let detail = event?.cotDetail
+        let shape = detail?.cotShape
+        let actual = shape?.cotEllipse
+        XCTAssertEqual(expected, actual)
+    }
+    
 }

@@ -13,6 +13,10 @@ public struct COTDetail : COTNode, Equatable {
     }
     
     public var childNodes:[COTNode] = []
+
+    public var cotLinks: [COTLink]? {
+        return childNodes.filter { $0 is COTLink } as? [COTLink]
+    }
     
     public var cotContact: COTContact? {
         return childNodes.first(where: { $0 is COTContact }) as? COTContact
@@ -25,9 +29,6 @@ public struct COTDetail : COTNode, Equatable {
     }
     public var cotChat: COTChat? {
         return childNodes.first(where: { $0 is COTChat }) as? COTChat
-    }
-    public var cotLink: COTLink? {
-        return childNodes.first(where: { $0 is COTLink }) as? COTLink
     }
     public var cotServerDestination: COTServerDestination? {
         return childNodes.first(where: { $0 is COTServerDestination }) as? COTServerDestination
@@ -43,6 +44,24 @@ public struct COTDetail : COTNode, Equatable {
     }
     public var cotVideo: COTVideo? {
         return childNodes.first(where: { $0 is COTVideo }) as? COTVideo
+    }
+    public var cotStrokeWeight: COTStrokeWeight? {
+        return childNodes.first(where: { $0 is COTStrokeWeight }) as? COTStrokeWeight
+    }
+    public var cotStrokeColor: COTStrokeColor? {
+        return childNodes.first(where: { $0 is COTStrokeColor }) as? COTStrokeColor
+    }
+    public var cotLabelsOn: COTLabelsOn? {
+        return childNodes.first(where: { $0 is COTLabelsOn }) as? COTLabelsOn
+    }
+    public var cotFillColor: COTFillColor? {
+        return childNodes.first(where: { $0 is COTFillColor }) as? COTFillColor
+    }
+    public var cotShape: COTShape? {
+        return childNodes.first(where: { $0 is COTShape }) as? COTShape
+    }
+    public var cotGroup: COTGroup? {
+        return childNodes.first(where: { $0 is COTGroup }) as? COTGroup
     }
 
     public func toXml() -> String {

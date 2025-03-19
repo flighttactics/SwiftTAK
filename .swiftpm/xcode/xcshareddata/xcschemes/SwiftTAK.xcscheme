@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1540"
+   LastUpgradeVersion = "1610"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -33,7 +33,72 @@
             reference = "container:../SwiftTAK.xctestplan"
             default = "YES">
          </TestPlanReference>
+         <TestPlanReference
+            reference = "container:../TAKAware/TestPlan.xctestplan">
+         </TestPlanReference>
       </TestPlans>
+      <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftTAKTests"
+               BuildableName = "SwiftTAKTests"
+               BlueprintName = "SwiftTAKTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A5D8D3892A53B0FA002F0E3E"
+               BuildableName = "TAKAwareTests.xctest"
+               BlueprintName = "TAKAwareTests"
+               ReferencedContainer = "container:../TAKAware/TAKAware.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SwiftTAKTests"
+               BuildableName = "SwiftTAKTests"
+               BlueprintName = "SwiftTAKTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A5D8D3892A53B0FA002F0E3E"
+               BuildableName = "TAKAwareTests.xctest"
+               BlueprintName = "TAKAwareTests"
+               ReferencedContainer = "container:../TAKAware/TAKAware.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A5D8D3932A53B0FB002F0E3E"
+               BuildableName = "TAKAwareUITests.xctest"
+               BlueprintName = "TAKAwareUITests"
+               ReferencedContainer = "container:../TAKAware/TAKAware.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "NIOSSLTests"
+               BuildableName = "NIOSSLTests"
+               BlueprintName = "NIOSSLTests"
+               ReferencedContainer = "container:../swift-nio-ssl">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

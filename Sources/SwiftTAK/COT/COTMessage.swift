@@ -37,7 +37,7 @@ public class COTMessage: NSObject {
     static public let DEFAULT_COT_TYPE = "a-f-G-U-C"
     static public let DEFAULT_CHAT_COT_TYPE = "b-t-f"
     static public let DEFAULT_HOW = HowType.MachineGPSDerived.rawValue
-    public let COT_EVENT_VERSION = "2.0"
+    static public let COT_EVENT_VERSION = "2.0"
     
     var staleTimeMinutes: Double
     var deviceID: String
@@ -76,7 +76,7 @@ public class COTMessage: NSObject {
         let latitude: String = positionInfo.latitude.description
         let longitude: String = positionInfo.longitude.description
         
-        var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: eventType, how: HowType.HumanGIGO.rawValue, time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
+        var cotEvent = COTEvent(version: COTMessage.COT_EVENT_VERSION, uid: deviceID, type: eventType, how: HowType.HumanGIGO.rawValue, time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
         
         let cotPoint = COTPoint(lat: latitude, lon: longitude, hae: heightAboveElipsoid, ce: circularError, le: linearError)
         
@@ -99,6 +99,7 @@ public class COTMessage: NSObject {
                                  callSign: String,
                                  group: String,
                                  role: String,
+                                 phone: String,
                                  phoneBatteryStatus: String = "") -> COTEvent {
         let cotTimeout = staleTimeMinutes * 60.0
         let heightAboveElipsoid: String = positionInfo.heightAboveElipsoid.description
@@ -109,13 +110,13 @@ public class COTMessage: NSObject {
         let speed: String = positionInfo.speed.description
         let course: String = positionInfo.course.description
         
-        var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: deviceID, type: cotType, how: cotHow, time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
+        var cotEvent = COTEvent(version: COTMessage.COT_EVENT_VERSION, uid: deviceID, type: cotType, how: cotHow, time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
         
         let cotPoint = COTPoint(lat: latitude, lon: longitude, hae: heightAboveElipsoid, ce: circularError, le: linearError)
         
         var cotDetail = COTDetail()
         
-        cotDetail.childNodes.append(COTContact(callsign: callSign))
+        cotDetail.childNodes.append(COTContact(phone: phone, callsign: callSign))
         cotDetail.childNodes.append(COTRemarks())
         cotDetail.childNodes.append(COTGroup(name: group, role: role))
         cotDetail.childNodes.append(COTUid(callsign: callSign))
@@ -139,9 +140,10 @@ public class COTMessage: NSObject {
                                callSign: String,
                                group: String,
                                role: String,
+                               phone: String,
                                phoneBatteryStatus: String = "") -> String {
         
-        return COTMessage.XML_HEADER + generateCOTEvent(cotType: cotType, cotHow: cotHow, positionInfo: positionInfo, callSign: callSign, group: group, role: role  , phoneBatteryStatus: phoneBatteryStatus).toXml()
+        return COTMessage.XML_HEADER + generateCOTEvent(cotType: cotType, cotHow: cotHow, positionInfo: positionInfo, callSign: callSign, group: group, role: role, phone: phone, phoneBatteryStatus: phoneBatteryStatus).toXml()
     }
     
     public func generateChatMessage(message: String,
@@ -161,7 +163,7 @@ public class COTMessage: NSObject {
         
         let eventUID = "GeoChat.\(from).\(conversationID).\(messageID)"
         
-        var cotEvent = COTEvent(version: COT_EVENT_VERSION, uid: eventUID, type: cotType, how: cotHow, time: eventTime, start: eventTime, stale: stale)
+        var cotEvent = COTEvent(version: COTMessage.COT_EVENT_VERSION, uid: eventUID, type: cotType, how: cotHow, time: eventTime, start: eventTime, stale: stale)
         
         cotEvent.childNodes.append(COTPoint(
             lat: positionInfo.latitude.description,

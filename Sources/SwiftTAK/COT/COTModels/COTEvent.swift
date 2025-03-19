@@ -24,6 +24,7 @@ public enum COTEventType: String {
     case REPLY = "y"
     // The ATAK project also shows examples with a 'u' prefix
     // We'll just consider these as custom
+    // These are things like polygons and routes
     case CUSTOM = "u"
 }
 
