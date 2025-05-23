@@ -152,7 +152,34 @@ public class COTXMLParser {
                 detail.childNodes.append(cotGroup)
             }
             
+            if let cotTrack = buildCOTTrack(cot: cot) {
+                detail.childNodes.append(cotTrack)
+            }
+            
+            if let cotStatus = buildCOTStatus(cot: cot) {
+                detail.childNodes.append(cotStatus)
+            }
+            
             return detail
+        }
+        return nil
+    }
+    
+    func buildCOTStatus(cot: XMLIndexer) -> COTStatus? {
+        if let cotStatus = cot["event"]["detail"]["status"].element {
+            let groupAttrs = cotStatus.allAttributes
+            let battery = groupAttrs["battery"]?.text ?? "0.0"
+            return COTStatus(battery: battery)
+        }
+        return nil
+    }
+    
+    func buildCOTTrack(cot: XMLIndexer) -> COTTrack? {
+        if let cotTrack = cot["event"]["detail"]["track"].element {
+            let groupAttrs = cotTrack.allAttributes
+            let speed = groupAttrs["speed"]?.text ?? ""
+            let course = groupAttrs["course"]?.text ?? ""
+            return COTTrack(speed: speed, course: course)
         }
         return nil
     }

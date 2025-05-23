@@ -63,6 +63,12 @@ public struct COTDetail : COTNode, Equatable {
     public var cotGroup: COTGroup? {
         return childNodes.first(where: { $0 is COTGroup }) as? COTGroup
     }
+    public var cotTrack: COTTrack? {
+        return childNodes.first(where: { $0 is COTTrack }) as? COTTrack
+    }
+    public var cotStatus: COTStatus? {
+        return childNodes.first(where: { $0 is COTStatus }) as? COTStatus
+    }
 
     public func toXml() -> String {
         return COTXMLHelper.generateXML(
