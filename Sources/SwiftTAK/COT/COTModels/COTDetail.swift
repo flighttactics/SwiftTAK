@@ -69,6 +69,9 @@ public struct COTDetail : COTNode, Equatable {
     public var cotStatus: COTStatus? {
         return childNodes.first(where: { $0 is COTStatus }) as? COTStatus
     }
+    public var cotMarti: COTMarti? {
+        return childNodes.first(where: { $0 is COTMarti }) as? COTMarti
+    }
 
     public func toXml() -> String {
         return COTXMLHelper.generateXML(

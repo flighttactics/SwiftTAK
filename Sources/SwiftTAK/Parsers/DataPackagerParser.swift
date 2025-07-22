@@ -75,7 +75,8 @@ public class DataPackageParser: NSObject {
     
     func retrieveManifestFileFromArchive() -> Data {
         if let manifestFileLocation = dataPackageContents.first(where: {
-            $0.lowercased().hasSuffix("manifest.xml")
+            $0.lowercased().hasSuffix("manifest.xml") &&
+            notHiddenFile($0)
         }) {
             return retrieveFileFromArchive(fileName: manifestFileLocation)
         } else {
@@ -202,7 +203,8 @@ public class DataPackageParser: NSObject {
     
     func storeRootDirectory() {
         if let manifestFileLocation = dataPackageContents.first(where: {
-            $0.lowercased().hasSuffix("manifest.xml")
+            $0.lowercased().hasSuffix("manifest.xml") &&
+            notHiddenFile($0)
         }) {
             let pathComponents = manifestFileLocation.split(separator: "/")
             if(pathComponents.count > 2) {
@@ -326,7 +328,8 @@ public class DataPackageParser: NSObject {
         var prefsFile = ""
         
         if let prefFileLocation = dataPackageContents.first(where: {
-            $0.hasSuffix(".pref")
+            $0.hasSuffix(".pref") &&
+            notHiddenFile($0)
         }) {
             prefsFile = prefFileLocation
         } else {

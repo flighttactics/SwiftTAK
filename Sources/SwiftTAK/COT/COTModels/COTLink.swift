@@ -17,8 +17,14 @@ public struct COTLink : COTNode, Equatable {
     public var callsign: String = ""
     public var remarks: String = ""
     public var point: String = ""
+    public var url: String = ""
+    public var mimeType: String = ""
     
-    public init(parentCallsign: String = "", productionTime: String = "", relation: String = "", type: String = "", uid: String = "", callsign: String = "", remarks: String = "", point: String = "") {
+    public var isUrl: Bool {
+        !url.isEmpty
+    }
+    
+    public init(parentCallsign: String = "", productionTime: String = "", relation: String = "", type: String = "", uid: String = "", callsign: String = "", remarks: String = "", point: String = "", url: String = "", mimeType: String = "") {
         self.parentCallsign = parentCallsign
         self.productionTime = productionTime
         self.relation = relation
@@ -27,6 +33,8 @@ public struct COTLink : COTNode, Equatable {
         self.callsign = callsign
         self.remarks = remarks
         self.point = point
+        self.url = url
+        self.mimeType = mimeType
     }
     
     public func toXml() -> String {
@@ -39,6 +47,8 @@ public struct COTLink : COTNode, Equatable {
         attrs["callsign"] = callsign
         attrs["remarks"] = remarks
         attrs["point"] = point
+        attrs["url"] = url
+        attrs["mime"] = mimeType
         return COTXMLHelper.generateXML(nodeName: "link", attributes: attrs, message: "")
     }
     
@@ -51,6 +61,8 @@ public struct COTLink : COTNode, Equatable {
             lhs.productionTime == rhs.productionTime &&
             lhs.parentCallsign == rhs.parentCallsign &&
             lhs.remarks == rhs.remarks &&
-            lhs.point == rhs.point
+            lhs.point == rhs.point &&
+            lhs.url == rhs.url &&
+            lhs.mimeType == rhs.mimeType
     }
 }

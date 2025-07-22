@@ -197,18 +197,17 @@ public class COTXMLParser {
     func buildCOTShape(cot: XMLIndexer) -> COTShape? {
         if cot["event"]["detail"]["shape"].element != nil {
             var cotShape = COTShape()
-            if let cotEllipse = buildCOTEllipse(cot: cot) {
-                cotShape.childNodes.append(cotEllipse)
-            }
-            
+            cotShape.childNodes.append(contentsOf: buildCOTEllipses(cot: cot))
             return cotShape
         }
         return nil
     }
     
-    func buildCOTEllipse(cot: XMLIndexer) -> COTEllipse? {
-        if let cotEllipse = cot["event"]["detail"]["shape"]["ellipse"].element {
-            let ellipseAttrs = cotEllipse.allAttributes
+    func buildCOTEllipses(cot: XMLIndexer) -> [COTEllipse] {
+        let allEllipses = cot["event"]["detail"]["shape"].children.filter { $0.element?.name == "ellipse" }
+        return allEllipses.compactMap { cotEllipse in
+            guard let cotEllipseElement = cotEllipse.element else { return nil }
+            let ellipseAttrs = cotEllipseElement.allAttributes
             let major = Double(ellipseAttrs["major"]?.text ?? "0.0") ?? 0.0
             let minor = Double(ellipseAttrs["minor"]?.text ?? "0.0") ?? 0.0
             let angle = Double(ellipseAttrs["angle"]?.text ?? "0.0") ?? 0.0
@@ -218,7 +217,6 @@ public class COTXMLParser {
                 angle: angle
             )
         }
-        return nil
     }
     
     func buildCOTFillColor(cot: XMLIndexer) -> COTFillColor? {
@@ -416,7 +414,9 @@ public class COTXMLParser {
                     uid: linkAttributes["uid"]?.text ?? "",
                     callsign: linkAttributes["callsign"]?.text ?? "",
                     remarks: linkAttributes["remarks"]?.text ?? "",
-                    point: linkAttributes["point"]?.text ?? ""
+                    point: linkAttributes["point"]?.text ?? "",
+                    url: linkAttributes["url"]?.text ?? "",
+                    mimeType: linkAttributes["mime"]?.text ?? ""
                 )
                 result.append(resultNode)
             }

@@ -33,7 +33,7 @@ public struct COTPositionInformation {
 
 public class COTMessage: NSObject {
     
-    static let XML_HEADER = "<?xml version=\"1.0\" standalone=\"yes\"?>"
+    static public let XML_HEADER = "<?xml version=\"1.0\" standalone=\"yes\"?>"
     static public let DEFAULT_COT_TYPE = "a-f-G-U-C"
     static public let DEFAULT_CHAT_COT_TYPE = "b-t-f"
     static public let DEFAULT_HOW = HowType.MachineGPSDerived.rawValue
@@ -76,7 +76,7 @@ public class COTMessage: NSObject {
         let latitude: String = positionInfo.latitude.description
         let longitude: String = positionInfo.longitude.description
         
-        var cotEvent = COTEvent(version: COTMessage.COT_EVENT_VERSION, uid: deviceID, type: eventType, how: HowType.HumanGIGO.rawValue, time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout))
+        var cotEvent = COTEvent(version: COTMessage.COT_EVENT_VERSION, uid: deviceID, type: eventType, how: HowType.HumanGIGO.rawValue, time: Date(), start: Date(), stale: Date().addingTimeInterval(cotTimeout * 60.0))
         
         let cotPoint = COTPoint(lat: latitude, lon: longitude, hae: heightAboveElipsoid, ce: circularError, le: linearError)
         

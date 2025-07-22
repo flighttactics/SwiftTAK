@@ -22,7 +22,7 @@ final class XMLTests: XCTestCase {
     }
     
     func testSendingEmptyBatteryStringDoesNotInsertBatteryStatus() throws {
-        let result = cotMessage!.generateCOTXml(positionInfo: positionInfo, callSign: callSign, group: group, role: role, phoneBatteryStatus: "")
+        let result = cotMessage!.generateCOTXml(positionInfo: positionInfo, callSign: callSign, group: group, role: role, phone:"", phoneBatteryStatus: "")
         let actualDoc = try XMLDocument(xmlString: result)
         let batteryNode = try actualDoc.nodes(forXPath: "//status[@battery]")
         XCTAssert(batteryNode.isEmpty, "Battery Node was included with empty battery status")

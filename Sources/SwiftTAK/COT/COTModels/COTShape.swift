@@ -15,6 +15,11 @@ public struct COTShape : COTNode, Equatable {
         return childNodes.first(where: { $0 is COTEllipse }) as? COTEllipse
     }
     
+    public var cotEllipses: [COTEllipse] {
+        let ellipses = childNodes.filter { $0 is COTEllipse } as? [COTEllipse] ?? []
+        return ellipses
+    }
+    
     public init(childNodes: [COTNode] = []) {
         self.childNodes = childNodes
     }

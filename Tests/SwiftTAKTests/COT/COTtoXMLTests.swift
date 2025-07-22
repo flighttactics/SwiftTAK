@@ -195,4 +195,14 @@ final class COToXMLTests: XCTestCase {
         
         XCTAssertEqual(expectedDoc, actualDoc)
     }
+    
+    func testCOTMartiToXML() throws {
+        let expected = "<marti><dest uid='HelloWorld' /></marti>"
+        let cotMarti = COTMarti(uid: "HelloWorld")
+        
+        let expectedDoc = try XMLDocument(xmlString: expected)
+        let actualDoc = try XMLDocument(xmlString: cotMarti.toXml())
+        
+        XCTAssertEqual(expectedDoc, actualDoc)
+    }
 }
