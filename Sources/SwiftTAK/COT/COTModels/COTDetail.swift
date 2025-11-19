@@ -72,6 +72,15 @@ public struct COTDetail : COTNode, Equatable {
     public var cotMarti: COTMarti? {
         return childNodes.first(where: { $0 is COTMarti }) as? COTMarti
     }
+    public var cotEmergency: COTEmergency? {
+        return childNodes.first(where: { $0 is COTEmergency }) as? COTEmergency
+    }
+    public var cotAttachmentList: COTAttachmentList? {
+        return childNodes.first(where: { $0 is COTAttachmentList }) as? COTAttachmentList
+    }
+    public var cotSensor: COTSensor? {
+        return childNodes.first(where: { $0 is COTSensor }) as? COTSensor
+    }
 
     public func toXml() -> String {
         return COTXMLHelper.generateXML(

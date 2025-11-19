@@ -32,24 +32,26 @@ public extension XMLAttribute? {
 public class COTXMLParser {
     
     let dateParser = COTDateParser()
+    public var parsedXml: XMLIndexer? = nil
     
     public init() {
     }
     
     public func parse(_ cotxml: String) -> COTEvent? {
-        let cot = XMLHash.parse(cotxml)
+        let parsedCotXml = XMLHash.parse(cotxml)
+        parsedXml = parsedCotXml
         
-        guard var event = buildCOTEvent(cot: cot) else {
+        guard var event = buildCOTEvent(cot: parsedCotXml) else {
             TAKLogger.debug("[COTXMLParser]: No CoT message was detected from the XML")
             TAKLogger.debug("[COTXMLParser]: \(cotxml)")
             return nil
         }
         
-        if let cotPoint = buildCOTPoint(cot: cot) {
+        if let cotPoint = buildCOTPoint(cot: parsedCotXml) {
             event.childNodes.append(cotPoint)
         }
         
-        if let cotDetail = buildCOTDetail(cot: cot) {
+        if let cotDetail = buildCOTDetail(cot: parsedCotXml) {
             event.childNodes.append(cotDetail)
         }
         
@@ -160,7 +162,45 @@ public class COTXMLParser {
                 detail.childNodes.append(cotStatus)
             }
             
+            if let cotEmergency = buildCOTEmergency(cot: cot) {
+                detail.childNodes.append(cotEmergency)
+            }
+            
+            if let cotAttachmentList = buildCOTAttachmentList(cot: cot) {
+                detail.childNodes.append(cotAttachmentList)
+            }
+            
+            if let cotSensor = buildCOTSensor(cot: cot) {
+                detail.childNodes.append(cotSensor)
+            }
+            
             return detail
+        }
+        return nil
+    }
+    
+    func buildCOTAttachmentList(cot: XMLIndexer) -> COTAttachmentList? {
+        if let cotAttachmentList = cot["event"]["detail"]["attachment_list"].element {
+            let groupAttrs = cotAttachmentList.allAttributes
+            let hashes = groupAttrs["hashes"]?.text ?? ""
+            if hashes.isEmpty {
+                TAKLogger.debug("[COTXMLParser]: No hashes were found in the attachment list")
+                return nil
+            }
+            return COTAttachmentList(hashes: hashes)
+        }
+        return nil
+    }
+    
+    func buildCOTEmergency(cot: XMLIndexer) -> COTEmergency? {
+        if let cotEmergency = cot["event"]["detail"]["emergency"].element {
+            let groupAttrs = cotEmergency.allAttributes
+            let cancelText = groupAttrs["cancel"]?.text ?? "false"
+            let cancel = (cancelText == "true")
+            let emergencyTypeText = groupAttrs["type"]?.text ?? "b-a-o-tbl"
+            let emergencyType = EmergencyType(rawValue: emergencyTypeText) ?? EmergencyType.NineOneOne
+            let callsign = cotEmergency.text
+            return COTEmergency(cancel: cancel, type: emergencyType, callsign: callsign)
         }
         return nil
     }
@@ -430,6 +470,24 @@ public class COTXMLParser {
             return COTServerDestination(
                 destinations: destinationAttributes["destinations"]?.text ?? ""
             )
+        }
+        return nil
+    }
+    
+    func buildCOTSensor(cot: XMLIndexer) -> COTSensor? {
+        if let cotSensor = cot["event"]["detail"]["sensor"].element {
+            let sensorAttributes = cotSensor.allAttributes
+            return COTSensor(
+                azimuth: Double(sensorAttributes["azimuth"]?.text ?? ""),
+                elevation: Double(sensorAttributes["elevation"]?.text ?? ""),
+                roll: Double(sensorAttributes["roll"]?.text ?? ""),
+                fov: Double(sensorAttributes["fov"]?.text ?? ""),
+                vfov: Double(sensorAttributes["vfov"]?.text ?? ""),
+                north: Double(sensorAttributes["north"]?.text ?? ""),
+                version: Double(sensorAttributes["version"]?.text ?? ""),
+                type: sensorAttributes["type"]?.text,
+                model: sensorAttributes["model"]?.text,
+                range: Double(sensorAttributes["range"]?.text ?? ""))
         }
         return nil
     }

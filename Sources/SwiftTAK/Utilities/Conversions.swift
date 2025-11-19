@@ -105,6 +105,18 @@ public class Conversions {
         return "\(direction)  \(unsignedDMS)"
     }
     
+    public static func LatLonToDDM(latitude: Double) -> String {
+        let direction = latitude > 0 ? "N" : "S"
+        let ddm = ConvertToDDM(latOrLong: latitude)
+        return "\(direction)  \(ddm)"
+    }
+    
+    public static func LatLonToDDM(longitude: Double) -> String {
+        let direction = longitude > 0 ? "E" : "W"
+        let ddm = ConvertToDDM(latOrLong: longitude)
+        return "\(direction)  \(ddm)"
+    }
+    
     public static func LatLonToDecimal(latitude: Double) -> String {
         return Conversions.formatOrZero(item: latitude, formatter: "%.4f")
     }
@@ -122,5 +134,17 @@ public class Conversions {
         let seconds = 3600 * (absDegrees - floorAbsDegrees) - (60 * minutes)
         return String(format: "%02.0f° %02.0f' %06.3f\"",
                              degrees, minutes, seconds)
+    }
+    
+    public static func ConvertToDDM(latOrLong: Double) -> String {
+        let absDegrees = abs(latOrLong)
+        let floorAbsDegrees = floor(absDegrees)
+        let degrees = floorAbsDegrees
+        let minutes = floor(60 * (absDegrees - floorAbsDegrees))
+        let seconds = 3600 * (absDegrees - floorAbsDegrees) - (60 * minutes)
+        let decimalSeconds = Double(seconds) / 60.0
+        let decimalMinutes = Double(minutes) + decimalSeconds
+        return String(format: "%02.0f° %02.4f'",
+                             degrees, decimalMinutes)
     }
 }

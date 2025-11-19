@@ -100,6 +100,7 @@ public class COTMessage: NSObject {
                                  group: String,
                                  role: String,
                                  phone: String,
+                                 remarks: String = "",
                                  phoneBatteryStatus: String = "") -> COTEvent {
         let cotTimeout = staleTimeMinutes * 60.0
         let heightAboveElipsoid: String = positionInfo.heightAboveElipsoid.description
@@ -117,7 +118,7 @@ public class COTMessage: NSObject {
         var cotDetail = COTDetail()
         
         cotDetail.childNodes.append(COTContact(phone: phone, callsign: callSign))
-        cotDetail.childNodes.append(COTRemarks())
+        cotDetail.childNodes.append(COTRemarks(message: remarks))
         cotDetail.childNodes.append(COTGroup(name: group, role: role))
         cotDetail.childNodes.append(COTUid(callsign: callSign))
         cotDetail.childNodes.append(COTTrack(speed: speed, course: course))
@@ -141,9 +142,10 @@ public class COTMessage: NSObject {
                                group: String,
                                role: String,
                                phone: String,
+                               remarks: String = "",
                                phoneBatteryStatus: String = "") -> String {
         
-        return COTMessage.XML_HEADER + generateCOTEvent(cotType: cotType, cotHow: cotHow, positionInfo: positionInfo, callSign: callSign, group: group, role: role, phone: phone, phoneBatteryStatus: phoneBatteryStatus).toXml()
+        return COTMessage.XML_HEADER + generateCOTEvent(cotType: cotType, cotHow: cotHow, positionInfo: positionInfo, callSign: callSign, group: group, role: role, phone: phone, remarks: remarks, phoneBatteryStatus: phoneBatteryStatus).toXml()
     }
     
     public func generateChatMessage(message: String,

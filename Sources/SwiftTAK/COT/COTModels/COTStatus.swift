@@ -12,6 +12,7 @@ public struct COTStatus : COTNode {
         self.battery = battery
     }
     
+    // Should be an integer representation from 0-100
     public var battery:String
     
     public func toXml() -> String {

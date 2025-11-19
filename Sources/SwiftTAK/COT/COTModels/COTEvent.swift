@@ -60,6 +60,17 @@ public struct COTEvent : COTNode, Equatable {
         COTEventType(rawValue: String(type.first ?? "u")) ?? COTEventType.CUSTOM
     }
     
+    public var isAlert: Bool {
+        if let cotEmergency = cotDetail?.cotEmergency {
+            return !cotEmergency.cancel
+        }
+        return false
+    }
+    
+    public var hasAttachments: Bool {
+        return cotDetail?.cotAttachmentList != nil
+    }
+    
     public func toXml() -> String {
         var attrs: [String:String] = [:]
         attrs["version"] = version

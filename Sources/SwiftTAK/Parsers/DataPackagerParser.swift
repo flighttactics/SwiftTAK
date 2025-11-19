@@ -168,13 +168,19 @@ public class DataPackageParser: NSObject {
         
         if !inMemory && extractLocation != nil {
             TAKLogger.debug("[DataPackageParser] Processing as a file-system based data package")
+            var wasSecurityScoped = false
             do {
                 TAKLogger.debug("[DataPackageParser] Extracting to \(extractLocation!.relativePath)")
+                wasSecurityScoped = sourceURL.startAccessingSecurityScopedResource()
                 try fileManager.unzipItem(at: sourceURL, to: extractLocation!)
                 dataPackageContents = fileManager.subpaths(atPath: extractLocation!.relativePath) ?? []
+                TAKLogger.debug("[DataPackageParser] Found \(dataPackageContents.count) files")
             } catch {
-                TAKLogger.error("[DataPackageParser] Unable to extract data package to \(extractLocation?.relativePath ?? "NO PATH"): \(error)")
+                TAKLogger.error("[DataPackageParser] Unable to extract data package to \(extractLocation?.relativePath ?? "NO PATH"): \(error) \(FileManager.default.fileExists(atPath: extractLocation!.absoluteString))")
                 return
+            }
+            if wasSecurityScoped {
+                sourceURL.stopAccessingSecurityScopedResource()
             }
         } else {
             TAKLogger.debug("[DataPackageParser] Processing as an in-memory data package")

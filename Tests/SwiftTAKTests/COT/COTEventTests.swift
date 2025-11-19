@@ -11,7 +11,7 @@ import XCTest
 
 final class COTEventTests: XCTestCase {
     func testReturnsProperEventTypeFromType() {
-        let cotType = "a-F-G"
+        let cotType = "a-f-G"
         let expected = COTEventType.ATOM
         let cotEvent = COTEvent(version: "2.0", uid: "1234", type: cotType, how: "m-h", time: Date(), start: Date(), stale: Date())
         XCTAssertEqual(expected, cotEvent.eventType)
