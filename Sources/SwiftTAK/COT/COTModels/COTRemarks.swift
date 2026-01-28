@@ -30,10 +30,6 @@ public struct COTRemarks : COTNode, Equatable {
     }
     
     public static func == (lhs: COTRemarks, rhs: COTRemarks) -> Bool {
-        TAKLogger.debug("***LHS vs RHS")
-        TAKLogger.debug(String(describing: lhs.timestamp))
-        TAKLogger.debug(String(describing: rhs.timestamp))
-        TAKLogger.debug("Are they the same? \(lhs.timestamp == rhs.timestamp)")
         return
             lhs.source == rhs.source &&
             lhs.timestamp == rhs.timestamp &&

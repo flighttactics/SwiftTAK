@@ -28,8 +28,27 @@ public struct COTConnectionEntry : COTNode, Equatable {
     public var ignoreEmbeddedKLV: Bool
     public var networkTimeout: Int
     public var bufferTime: Int
+    public var active: Bool = true
+    public var bitrate: Int32? = nil
+    public var classification: String? = nil
+    public var fov: String? = nil
+    public var heading: String? = nil
+    public var height: Int32? = nil
+    public var latitude: String? = nil
+    public var longitude: String? = nil
+    public var macAddress: String? = nil
+    public var order: Int32? = nil
+    public var range: String? = nil
+    public var source: String? = nil
+    public var thumbnail: String? = nil
+    public var width: Int32? = nil
     
     public var url: String {
+        if let uri = URL(string: address) {
+            if uri.scheme != nil {
+                return address
+            }
+        }
         return "\(connectionProtocol)://\(address):\(port)\(path)"
     }
 
@@ -46,6 +65,7 @@ public struct COTConnectionEntry : COTNode, Equatable {
         attrs["ignoreEmbeddedKLV"] = ignoreEmbeddedKLV.description
         attrs["networkTimeout"] = networkTimeout.description
         attrs["bufferTime"] = bufferTime.description
+        attrs["active"] = active ? "true" : "false"
         
         return COTXMLHelper.generateXML(nodeName: "ConnectionEntry", attributes: attrs, message: "")
     }
@@ -61,7 +81,8 @@ public struct COTConnectionEntry : COTNode, Equatable {
         lhs.rtspReliable == rhs.rtspReliable &&
         lhs.ignoreEmbeddedKLV == rhs.ignoreEmbeddedKLV &&
         lhs.networkTimeout == rhs.networkTimeout &&
-        lhs.bufferTime == rhs.bufferTime
+        lhs.bufferTime == rhs.bufferTime &&
+        lhs.active == rhs.active
     }
 }
 

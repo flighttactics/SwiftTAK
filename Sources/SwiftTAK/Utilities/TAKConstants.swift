@@ -132,6 +132,14 @@ public enum HowType: String, CaseIterable, Identifiable {
     case MachineRadioTadilJ = "m-R-t-j"
     
     public var id: Self { self }
+    
+    public var isHumanGenerated: Bool {
+        self.rawValue.hasPrefix("h")
+    }
+    
+    public var isMachineGenerated: Bool {
+        self.rawValue.hasPrefix("m")
+    }
 }
 
 public enum LinkType: String, CaseIterable, Identifiable {

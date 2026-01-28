@@ -37,8 +37,22 @@ public struct DataPackageContents {
     public var serverCertificatePassword: String = ""
     public var serverCertificates: [TAKServerCertificatePackage] = []
     public var serverURL: String = ""
-    public var serverPort: String = ""
-    public var serverProtocol: String = ""
+    public var serverPort: String = "8089"
+    public var serverApiPort: String = "8446"
+    public var serverSecureApiPort: String = "8443"
+    public var serverProtocol: String = "SSL" //TCP, SSL, QUIC
+    
+    public var hasServerDefined: Bool {
+        !serverURL.isEmpty
+    }
+    
+    public var hasServerCertificates: Bool {
+        !serverCertificates.isEmpty
+    }
+    
+    public var hasUserCertificate: Bool {
+        !userCertificate.isEmpty
+    }
     
     public init() {}
 }
@@ -86,6 +100,47 @@ public class DataPackageParser: NSObject {
     
     public func retrieveFileFromArchive(_ dataPackageFile: DataPackageContentsFile) -> Data {
         return retrieveFileFromArchive(fileName: dataPackageFile.fileLocation)
+    }
+    
+    public func retrieveFileUrlFromArchive(_ dataPackageFile: DataPackageContentsFile) -> URL? {
+        return retrieveFileUrlFromArchive(fileName: dataPackageFile.fileLocation)
+    }
+    
+    func retrieveFileUrlFromArchive(fileName: String) -> URL? {
+        var fileLocation = fileName
+        
+        guard !fileName.isEmpty else {
+            TAKLogger.debug("[DataPackageParser] Attempting to retrieve a file URL without a filename. Ignoring")
+            return nil
+        }
+
+        if inMemory {
+            return nil
+        } else {
+            TAKLogger.debug("[DataPackageParser] Loading from a file-system based data package")
+            guard let extractLocation = extractLocation else {
+                TAKLogger.error("[DataPackageParser] Marked as a file-system retrieval but no extract location found")
+                return nil
+            }
+            
+            let pathComponents = fileLocation.split(separator: "/")
+            
+            if(!packageContents.rootFolder.isEmpty) {
+                if(pathComponents.count > 1 && pathComponents.first! == packageContents.rootFolder) {
+                    TAKLogger.debug("[DataPackageParser]: Not applying a root folder since it appears to already be in place")
+                } else {
+                    let root = packageContents.rootFolder
+                    fileLocation = root.appending("/").appending(fileLocation)
+                }
+            }
+            
+            let fileUrlString = "\(extractLocation.absoluteString)/\(fileLocation)"
+            guard let fileUrl = URL(string: fileUrlString) else {
+                TAKLogger.error("[DataPackageParser] Unable to create the file location URL from \(fileUrlString)")
+                return nil
+            }
+            return fileUrl
+        }
     }
     
     func retrieveFileFromArchive(fileName: String) -> Data {
@@ -231,6 +286,8 @@ public class DataPackageParser: NSObject {
     }
     
     func storeUserCertificate(prefs: TAKPreferences) {
+        let fileName = prefs.userCertificateFileName()
+        guard !fileName.isEmpty else { return }
         let certData = retrieveFileFromArchive(fileName: prefs.userCertificateFileName())
         packageContents.userCertificate = certData
         TAKLogger.debug("[DataPackageParser]: Storing User Certificate")
@@ -260,6 +317,7 @@ public class DataPackageParser: NSObject {
     }
     
     func storeServerCertificates(prefs: TAKPreferences) {
+        guard !prefs.serverCertificates.isEmpty else { return }
         var didStoreAtLeastOneCertificate = false
         prefs.serverCertificates.forEach { key, serverCert in
             let certData = retrieveFileFromArchive(fileName: serverCert.certificateFileName)
@@ -300,6 +358,7 @@ public class DataPackageParser: NSObject {
     }
     
     func storePreferences(preferences: TAKPreferences) {
+        guard !preferences.serverConnectionAddress().isEmpty else { return }
         packageContents.userCertificatePassword = preferences.userCertificatePassword
         packageContents.serverCertificatePassword = preferences.serverCertificatePassword
 

@@ -8,7 +8,7 @@
 import Foundation
 
 public class COTDateParser {
-    public func parse(_ dateString: String) -> Date? {
+    public static func parse(_ dateString: String) -> Date? {
         var parsedDate: Date? = nil
         let standardFormat = Date.ISO8601FormatStyle()
         let fractionalSecondsFormat = Date.ISO8601FormatStyle()

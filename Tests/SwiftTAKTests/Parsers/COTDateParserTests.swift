@@ -11,7 +11,6 @@ import XCTest
 
 class COTDateParserTests: SwiftTAKTestCase {
     
-    let parser = COTDateParser()
     let dateFormatter = ISO8601DateFormatter()
     
     override func setUp() async throws {
@@ -25,7 +24,7 @@ class COTDateParserTests: SwiftTAKTestCase {
     func testHandlesStandardISO8601Format() {
         let dateString = "2024-03-11T12:43:51Z"
         let expected = dateFormatter.date(from: dateString)
-        let actual = parser.parse(dateString)
+        let actual = COTDateParser.parse(dateString)
         XCTAssertEqual(expected, actual)
         
     }
@@ -34,7 +33,7 @@ class COTDateParserTests: SwiftTAKTestCase {
         let dateString = "2024-03-11T12:43:51.711Z"
         dateFormatter.formatOptions.update(with: .withFractionalSeconds)
         let expected = dateFormatter.date(from: dateString)
-        let actual = parser.parse(dateString)
+        let actual = COTDateParser.parse(dateString)
         XCTAssertEqual(expected, actual)
     }
 }

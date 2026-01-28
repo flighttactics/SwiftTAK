@@ -81,6 +81,13 @@ public struct COTDetail : COTNode, Equatable {
     public var cotSensor: COTSensor? {
         return childNodes.first(where: { $0 is COTSensor }) as? COTSensor
     }
+    public var cotHideLabel: COTHideLabel? {
+        return childNodes.first(where: { $0 is COTHideLabel }) as? COTHideLabel
+    }
+    
+    public var cotFileshare: COTFileshare? {
+        return childNodes.first(where: { $0 is COTFileshare }) as? COTFileshare
+    }
 
     public func toXml() -> String {
         return COTXMLHelper.generateXML(

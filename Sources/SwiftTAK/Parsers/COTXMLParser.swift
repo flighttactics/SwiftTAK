@@ -31,7 +31,6 @@ public extension XMLAttribute? {
 
 public class COTXMLParser {
     
-    let dateParser = COTDateParser()
     public var parsedXml: XMLIndexer? = nil
     
     public init() {
@@ -69,9 +68,9 @@ public class COTXMLParser {
                         uid: eventAttributes["uid"]?.text ?? "",
                         type: eventAttributes["type"]?.text ?? "",
                         how: eventAttributes["how"]?.text ?? "",
-                        time: dateParser.parse(eventAttributes["time"]?.text ?? "") ?? Date(),
-                        start: dateParser.parse(eventAttributes["start"]?.text ?? "") ?? Date(),
-                        stale: dateParser.parse(eventAttributes["stale"]?.text ?? "") ?? Date())
+                        time: COTDateParser.parse(eventAttributes["time"]?.text ?? "") ?? Date(),
+                        start: COTDateParser.parse(eventAttributes["start"]?.text ?? "") ?? Date(),
+                        stale: COTDateParser.parse(eventAttributes["stale"]?.text ?? "") ?? Date())
     }
     
     func buildCOTPoint(cot: XMLIndexer) -> COTPoint? {
@@ -174,7 +173,45 @@ public class COTXMLParser {
                 detail.childNodes.append(cotSensor)
             }
             
+            if let cotHideLabel = buildCOTHideLabel(cot: cot) {
+                detail.childNodes.append(cotHideLabel)
+            }
+            
+            if let cotFileshare = buildCOTFileshare(cot: cot) {
+                detail.childNodes.append(cotFileshare)
+            }
+            
             return detail
+        }
+        return nil
+    }
+    
+    func buildCOTFileshare(cot: XMLIndexer) -> COTFileshare? {
+        if let cotFileshareNode = cot["event"]["detail"]["fileshare"].element {
+            let groupAttrs = cotFileshareNode.allAttributes
+            let fileName = groupAttrs["filename"]?.text ?? "Unknown Name"
+            let senderUrl = groupAttrs["senderUrl"]?.text ?? ""
+            let sha256 = groupAttrs["sha256"]?.text ?? ""
+            let senderUid = groupAttrs["senderUid"]?.text ?? ""
+            let senderCallsign = groupAttrs["senderCallsign"]?.text ?? ""
+            let name = groupAttrs["name"]?.text ?? ""
+            let sizeInBytes = groupAttrs["sizeInBytes"]?.text ?? "-1"
+            return COTFileshare(
+                fileName: fileName,
+                senderUrl: senderUrl,
+                sha256: sha256,
+                senderUid: senderUid,
+                senderCallsign: senderCallsign,
+                name: name,
+                sizeInBytes: sizeInBytes
+            )
+        }
+        return nil
+    }
+    
+    func buildCOTHideLabel(cot: XMLIndexer) -> COTHideLabel? {
+        if let _ = cot["event"]["detail"]["hideLabel"].element {
+            return COTHideLabel()
         }
         return nil
     }
@@ -389,7 +426,7 @@ public class COTXMLParser {
             let remarksAttributes = cotRemarks.allAttributes
             return COTRemarks(
                 source: remarksAttributes["source"]?.text ?? "",
-                timestamp: dateParser.parse(remarksAttributes["time"]?.text ?? ""),
+                timestamp: COTDateParser.parse(remarksAttributes["time"]?.text ?? ""),
                 message: cotRemarks.text,
                 to: remarksAttributes["to"]?.text ?? ""
             )
