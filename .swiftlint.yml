@@ -1,0 +1,4 @@
+excluded:
+  - .build
+
+baseline: Baseline.json
