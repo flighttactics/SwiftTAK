@@ -7,6 +7,7 @@ let package = Package(
     name: "SwiftTAK",
     platforms: [
         .iOS(.v15),
+        .macOS(.v12)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -16,19 +17,27 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMajor(from: "0.9.0")),
-        .package(url: "https://github.com/drmohundro/SWXMLHash.git", .upToNextMajor(from: "7.0.0"))
+        .package(url: "https://github.com/drmohundro/SWXMLHash.git", .upToNextMajor(from: "7.0.0")),
+        .package(url: "https://github.com/SimplyDanny/SwiftLintPlugins.git", from: "0.55.1")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "SwiftTAK",
-            dependencies: ["ZIPFoundation", "SWXMLHash"]),
+            dependencies: ["ZIPFoundation", "SWXMLHash"],
+            plugins: [
+                .plugin(name: "SwiftLintBuildToolPlugin", package: "SwiftLintPlugins")
+            ]
+        ),
         .testTarget(
             name: "SwiftTAKTests",
             dependencies: ["SwiftTAK", "SWXMLHash", "ZIPFoundation"],
             resources: [
                 .process("TestAssets")
+            ],
+            plugins: [
+                .plugin(name: "SwiftLintBuildToolPlugin", package: "SwiftLintPlugins")
             ]
         ),
     ]
