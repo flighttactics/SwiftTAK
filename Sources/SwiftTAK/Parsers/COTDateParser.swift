@@ -27,4 +27,15 @@ public class COTDateParser {
         
         return nil
     }
+    
+    public static func toTAKDateString(from date: Date) -> String {
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        dateFormatter.formatOptions = [
+            .withFullDate,
+            .withFullTime,
+            .withDashSeparatorInDate,
+            .withFractionalSeconds]
+        return dateFormatter.string(from: date)
+    }
 }

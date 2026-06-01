@@ -335,6 +335,95 @@ final class LoadingOtherFilesFromPackageTests: DataPackageParserTests {
     }
 }
 
+final class LoadingOtherFilesFromPackageWithoutManifestTests: DataPackageParserTests {
+    override func dataPackageFilename() -> String {
+        TestConstants.DP_MULTI_FILE_NO_MANIFEST_ZIP
+    }
+
+    override class var defaultTestSuite: XCTestSuite {
+        XCTestSuite(forTestCaseClass: Self.self)
+    }
+
+    func testAddsNonCertificateFilesToFileStore() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageFiles.count > 0)
+    }
+
+    func testLoadsEmptyManifestConfigurationParameters() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertEqual(parser.packageConfiguration.count, 0)
+    }
+
+    func testCapturesTheIgnoreFlag() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        let parsedFile = parser.packageFiles.first(where: {$0.fileLocation == "b442d62a63007b3f8562caeeb3bcbf37/startmap.kmz"})
+        XCTAssertNotNil(parsedFile)
+        XCTAssertFalse(parsedFile!.shouldIgnore)
+    }
+
+    func testCapturesFilesInRootDirectory() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        let parsedFile = parser.packageFiles.first(where: {$0.fileLocation == "rootsarefortrees.pdf"})
+        XCTAssertNotNil(parsedFile)
+    }
+
+    func testIncludesNoParametersForTheFile() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        let parsedFile = parser.packageFiles.first(where: {$0.fileLocation == "b442d62a63007b3f8562caeeb3bcbf37/startmap.kmz"})
+        XCTAssertNotNil(parsedFile)
+        XCTAssertEqual(parsedFile!.parameters.count, 0)
+    }
+
+    // This DP has no user or server certs in it, so override all these tests
+    // We do want to leave them to make sure that nothing crashes dealing with them
+    override func testLoadsServerCertificate() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverCertificates.isEmpty)
+    }
+
+    override func testLoadsServerCertificatePassword() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverCertificates.isEmpty)
+    }
+
+    override func testLoadsUserCertificate() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.userCertificate.isEmpty)
+    }
+
+    override func testLoadsUserCertificatePassword() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.userCertificatePassword.isEmpty)
+    }
+
+    override func testLoadsServerURL() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverURL.isEmpty)
+    }
+
+    override func testLoadsServerPort() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverPort.isEmpty)
+    }
+
+    override func testLoadsServerProtocol() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertTrue(parser.packageContents.serverProtocol.isEmpty)
+    }
+}
+
 class DataPackageParserTests: SwiftTAKTestCase {
     
     func dataPackageFilename() -> String {

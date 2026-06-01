@@ -17,6 +17,7 @@ public struct TestConstants {
     static let DP_NO_MANIFEST = "tak-no-manifest"
     static let DP_INVALID_ZIP = "invalid-data-package-zip"
     static let DP_MULTI_FILE_ZIP = "multifile-data-package-zip"
+    static let DP_MULTI_FILE_NO_MANIFEST_ZIP = "multifile-data-package-no-manifest-zip"
     static let DP_ATAK_MULTI_CERT = "tak-multi-cert-atak-format"
     static let DP_NON_MATCHING_CERT_NAME = "tak-non-matching-cert-name"
     static let DP_FILE_EXTENSION = "zip"

@@ -30,15 +30,11 @@ public extension XMLAttribute? {
 }
 
 public class COTXMLParser {
-    
-    public var parsedXml: XMLIndexer? = nil
-    
     public init() {
     }
     
     public func parse(_ cotxml: String) -> COTEvent? {
         let parsedCotXml = XMLHash.parse(cotxml)
-        parsedXml = parsedCotXml
         
         guard var event = buildCOTEvent(cot: parsedCotXml) else {
             TAKLogger.debug("[COTXMLParser]: No CoT message was detected from the XML")

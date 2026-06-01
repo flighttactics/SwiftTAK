@@ -20,7 +20,7 @@ public struct TAKServerCertificatePackage {
     }
 }
 
-public struct DataPackageContentsFile {
+public struct DataPackageContentsFile: Sendable {
     public var shouldIgnore: Bool = false
     public var fileLocation: String
     public var parameters: [String:String] = [:]
@@ -221,17 +221,30 @@ public class DataPackageParser: NSObject {
             return
         }
         
-        if !inMemory && extractLocation != nil {
+        if !inMemory, let extractLocation {
             TAKLogger.debug("[DataPackageParser] Processing as a file-system based data package")
             var wasSecurityScoped = false
             do {
-                TAKLogger.debug("[DataPackageParser] Extracting to \(extractLocation!.relativePath)")
+                TAKLogger.debug("[DataPackageParser] Extracting to \(extractLocation.relativePath)")
                 wasSecurityScoped = sourceURL.startAccessingSecurityScopedResource()
-                try fileManager.unzipItem(at: sourceURL, to: extractLocation!)
-                dataPackageContents = fileManager.subpaths(atPath: extractLocation!.relativePath) ?? []
+                if #available(iOS 16.0, *) {
+                    if fileManager.fileExists(atPath: extractLocation.path(percentEncoded: false)) {
+                        TAKLogger.debug("[DataPackageParser] Source already existed, cleaning")
+                        try fileManager.contentsOfDirectory(atPath: extractLocation.path(percentEncoded: false)).forEach { dirFileName in
+                            TAKLogger.debug("[DataPackageParser] Removing \(extractLocation.appending(path: dirFileName).path())")
+                            try fileManager.removeItem(at: extractLocation.appending(path: dirFileName))
+                        }
+                        try fileManager.removeItem(at: extractLocation)
+                    }
+                } else {
+                    // TODO: Make work in iOS 15
+                    TAKLogger.error("May not be able to delete existing file")
+                }
+                try fileManager.unzipItem(at: sourceURL, to: extractLocation)
+                dataPackageContents = fileManager.subpaths(atPath: extractLocation.relativePath) ?? []
                 TAKLogger.debug("[DataPackageParser] Found \(dataPackageContents.count) files")
             } catch {
-                TAKLogger.error("[DataPackageParser] Unable to extract data package to \(extractLocation?.relativePath ?? "NO PATH"): \(error) \(FileManager.default.fileExists(atPath: extractLocation!.absoluteString))")
+                TAKLogger.error("[DataPackageParser] Unable to extract data package to \(extractLocation.relativePath): \(error) \(FileManager.default.fileExists(atPath: extractLocation.absoluteString))")
                 return
             }
             if wasSecurityScoped {
@@ -285,9 +298,9 @@ public class DataPackageParser: NSObject {
         }
     }
     
-    func storeUserCertificate(prefs: TAKPreferences) {
+    public func storeUserCertificate(prefs: TAKPreferences) {
         let fileName = prefs.userCertificateFileName()
-        guard !fileName.isEmpty else { return }
+        guard !fileName.isEmpty else { TAKLogger.debug("[DataPackageParser]: empty file name for user cert!"); return }
         let certData = retrieveFileFromArchive(fileName: prefs.userCertificateFileName())
         packageContents.userCertificate = certData
         TAKLogger.debug("[DataPackageParser]: Storing User Certificate")
@@ -316,7 +329,7 @@ public class DataPackageParser: NSObject {
         return !(fileName == prefs.userCertificateFileName())
     }
     
-    func storeServerCertificates(prefs: TAKPreferences) {
+    public func storeServerCertificates(prefs: TAKPreferences) {
         guard !prefs.serverCertificates.isEmpty else { return }
         var didStoreAtLeastOneCertificate = false
         prefs.serverCertificates.forEach { key, serverCert in
@@ -374,19 +387,29 @@ public class DataPackageParser: NSObject {
         let xmlParser = XMLParser(data: prefData)
         xmlParser.delegate = prefsParser
         xmlParser.parse()
+        TAKLogger.debug("[DataPackageParser] Finished parsePrefsFile")
         return prefsParser.preferences
     }
     
     func parseManifestFile() {
         TAKLogger.debug("[DataPackageParser] Attempting to parse manifest file")
         let manifestData = retrieveManifestFileFromArchive()
-        TAKLogger.debug("[DataPackageParser] Manifest: \(manifestData)")
-        let xmlParser = XMLParser(data: manifestData)
-        let manifestParser = ManifestParser()
-        xmlParser.delegate = manifestParser
-        xmlParser.parse()
-        packageFiles = manifestParser.dataPackageFiles
-        packageConfiguration = manifestParser.manifestConfiguration
+        if !manifestData.isEmpty {
+            TAKLogger.debug("[DataPackageParser] Manifest: \(manifestData)")
+            let xmlParser = XMLParser(data: manifestData)
+            let manifestParser = ManifestParser()
+            xmlParser.delegate = manifestParser
+            xmlParser.parse()
+            packageFiles = manifestParser.dataPackageFiles
+            packageConfiguration = manifestParser.manifestConfiguration
+        } else {
+            TAKLogger.debug("[DataPackageParser] No manifest file found")
+            TAKLogger.debug("Populating files without a manifest")
+            dataPackageContents.forEach { contents in
+                packageFiles.append(DataPackageContentsFile(fileLocation: contents))
+            }
+        }
+
     }
     
     func retrievePrefsFile() -> String {

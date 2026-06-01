@@ -7,8 +7,8 @@
 
 import Foundation
 
-public struct COTLink : COTNode, Equatable {
-    
+public struct COTLink : COTNode, Equatable, Codable {
+
     public var parentCallsign: String = ""
     public var productionTime: String = ""
     public var relation: String = ""

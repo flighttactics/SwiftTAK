@@ -12,16 +12,26 @@ public struct COTAttachmentList : COTNode, Equatable {
     public var hashes: String = ""
     
     public init(hashes: String) {
-        self.hashes = hashes
+        self.hashes = cleanHashesList(hashes)
     }
-    
+
+    private func cleanHashesList(_ incomingHashes: String) -> String {
+        var cleanedHashesList = incomingHashes
+        cleanedHashesList = cleanedHashesList.replacingOccurrences(of: "[", with: "")
+        cleanedHashesList = cleanedHashesList.replacingOccurrences(of: "]", with: "")
+        cleanedHashesList = cleanedHashesList.replacingOccurrences(of: "\"", with: "")
+        cleanedHashesList = cleanedHashesList.replacingOccurrences(of: "&quot;", with: "")
+        return cleanedHashesList
+    }
+
     public var attachmentHashes: [String] {
         hashes.components(separatedBy: ",")
     }
     
     public func toXml() -> String {
         var attrs: [String:String] = [:]
-        attrs["hashes"] = hashes.description
+        // Note: This is how TAK server actually expects it to come across
+        attrs["hashes"] = "[&quot;\(hashes)&quot;]"
         return COTXMLHelper.generateXML(nodeName: "attachment_list", attributes: attrs, message: "")
     }
     

@@ -28,7 +28,7 @@ public enum COTEventType: String {
     case CUSTOM = "u"
 }
 
-public struct COTEvent : COTNode, Equatable {
+public struct COTEvent : COTNode, Equatable, Sendable {
     public init(version: String, uid: String, type: String, how: String, time: Date, start: Date, stale: Date, childNodes: [COTNode] = []) {
         self.version = version
         self.uid = uid

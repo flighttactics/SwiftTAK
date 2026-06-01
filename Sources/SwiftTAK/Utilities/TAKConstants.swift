@@ -43,7 +43,7 @@ public struct TAKConstants {
     }
 }
 
-public enum TeamRole: String, CaseIterable, Identifiable {
+public enum TeamRole: String, CaseIterable, Identifiable, Codable {
     case TeamMember = "Team Member"
     case TeamLead = "Team Lead"
     case HQ = "HQ"
@@ -56,7 +56,7 @@ public enum TeamRole: String, CaseIterable, Identifiable {
     public var id: Self { self }
 }
 
-public enum TeamColor: String, CaseIterable, Identifiable {
+public enum TeamColor: String, CaseIterable, Identifiable, Codable {
     case Blue = "Blue"
     case DarkBlue = "Dark Blue"
     case Brown = "Brown"
@@ -75,7 +75,7 @@ public enum TeamColor: String, CaseIterable, Identifiable {
     public var id: Self { self }
 }
 
-public enum UnitType: String, CaseIterable, Identifiable {
+public enum UnitType: String, CaseIterable, Identifiable, Codable {
     case Ground = "Ground"
     case Air = "Air"
     case Sea = "Sea"
@@ -83,7 +83,7 @@ public enum UnitType: String, CaseIterable, Identifiable {
     public var id: Self { self }
 }
 
-public enum EmergencyType: String, CaseIterable, CustomStringConvertible, Identifiable {
+public enum EmergencyType: String, CaseIterable, CustomStringConvertible, Identifiable, Codable {
     case NineOneOne = "911 Alert"
     case Cancel = "Cancel Alert"
     case Geofence = "Geo-fence Breached"
@@ -103,7 +103,7 @@ public enum EmergencyType: String, CaseIterable, CustomStringConvertible, Identi
     public var id: Self { self }
 }
 
-public enum HowType: String, CaseIterable, Identifiable {
+public enum HowType: String, CaseIterable, Identifiable, Codable {
     case HumanEstimated = "h-e"
     case HumanCalculated = "h-c"
     case HumanTranscribed = "h-t"
@@ -142,7 +142,7 @@ public enum HowType: String, CaseIterable, Identifiable {
     }
 }
 
-public enum LinkType: String, CaseIterable, Identifiable {
+public enum LinkType: String, CaseIterable, Identifiable, Codable {
     case ParentProducer = "p-p"
     case ParentOwner = "p-o"
     case ParentManager = "p-m"
