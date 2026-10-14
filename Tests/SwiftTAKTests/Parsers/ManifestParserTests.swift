@@ -75,4 +75,30 @@ class ManifestParserTests: SwiftTAKTestCase {
         let expectedFileCount = 7
         XCTAssertEqual(parser.dataPackageFiles.count, expectedFileCount)
     }
+
+    func testNormalizesBackslashZipEntries() {
+        let legacy = ManifestParser()
+        let xml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <MissionPackageManifest version="2">
+          <Configuration>
+            <Parameter name="uid" value="legacy-uid"/>
+            <Parameter name="name" value="legacy"/>
+          </Configuration>
+          <Contents>
+            <Content ignore="false" zipEntry="certs\\tak-server.pref"/>
+            <Content ignore="false" zipEntry="folder\\sub\\marker.cot"/>
+          </Contents>
+        </MissionPackageManifest>
+        """
+        let xmlParser = XMLParser(data: Data(xml.utf8))
+        xmlParser.delegate = legacy
+        xmlParser.parse()
+        XCTAssertEqual(legacy.dataPackageFiles.map(\.fileLocation), [
+            "certs/tak-server.pref",
+            "folder/sub/marker.cot"
+        ])
+        XCTAssertEqual(legacy.dataPackageFiles[0].fileName, "tak-server.pref")
+        XCTAssertEqual(legacy.dataPackageFiles[1].normalizedZipEntry, "folder/sub/marker.cot")
+    }
 }

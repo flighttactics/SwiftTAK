@@ -11,13 +11,15 @@ public struct COTContact : COTNode, Equatable {
     
     public static let DEFAULT_ENDPOINT: String = "*:-1:stcp"
     
-    public init(endpoint: String = COTContact.DEFAULT_ENDPOINT, phone: String = "", callsign: String) {
+    /// `endpoint` is only for live contacts / SA. Markers and shapes should omit it
+    /// (pass `""` or leave the default) so it is not serialized.
+    public init(endpoint: String = "", phone: String = "", callsign: String) {
         self.endpoint = endpoint
         self.phone = phone
         self.callsign = callsign
     }
     
-    public var endpoint:String = COTContact.DEFAULT_ENDPOINT
+    public var endpoint:String = ""
     public var phone:String = ""
     public var callsign:String
     

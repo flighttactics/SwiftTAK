@@ -16,7 +16,9 @@ public struct COTColor : COTNode, Equatable {
     
     public func toXml() -> String {
         var attrs: [String:String] = [:]
+        // Emit both: ATAK markers read `argb`, shapes/routes often read `value`.
         attrs["argb"] = argb.description
+        attrs["value"] = argb.description
         return COTXMLHelper.generateXML(nodeName: "color", attributes: attrs, message: "")
     }
     

@@ -41,14 +41,14 @@ public class ManifestParser: NSObject, XMLParserDelegate {
                 TAKLogger.debug("[ManifestParser] No zipEntry for Content node. Skipping")
                 return
             }
-            currentDataPackageFile = DataPackageContentsFile(fileLocation: fileLocation)
+            // Normalize legacy ATAK backslash zipEntry paths immediately.
+            let normalizedLocation = fileLocation.replacingOccurrences(of: "\\", with: "/")
+            currentDataPackageFile = DataPackageContentsFile(fileLocation: normalizedLocation)
             if let ignoreFlag = attributeDict["ignore"] {
                 currentDataPackageFile?.shouldIgnore = (ignoreFlag == "true")
             }
             
-            // Legacy
-            let splitFile = fileLocation.components(separatedBy: "\\")
-            let file = splitFile[splitFile.count-1]
+            let file = normalizedLocation.split(separator: "/").last.map(String.init) ?? normalizedLocation
             TAKLogger.debug("[ManifestParser]: Adding file \(file)")
             fileNames.append(file)
         } else if(elementName == "Parameter") {

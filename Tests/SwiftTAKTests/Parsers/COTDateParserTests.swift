@@ -36,4 +36,18 @@ class COTDateParserTests: SwiftTAKTestCase {
         let actual = COTDateParser.parse(dateString)
         XCTAssertEqual(expected, actual)
     }
+
+    func testParseStaleAttributeUsesParsedDateWhenValid() {
+        let dateString = "2024-03-11T13:23:13.000Z"
+        let expected = dateFormatter.date(from: dateString)
+        let actual = COTDateParser.parseStaleAttribute(dateString)
+        XCTAssertEqual(expected, actual)
+    }
+
+    func testParseStaleAttributeReturnsNoExpirationWhenMissingOrInvalid() {
+        XCTAssertEqual(COTDateParser.parseStaleAttribute(nil), COTDateParser.noExpirationStale)
+        XCTAssertEqual(COTDateParser.parseStaleAttribute(""), COTDateParser.noExpirationStale)
+        XCTAssertEqual(COTDateParser.parseStaleAttribute("   "), COTDateParser.noExpirationStale)
+        XCTAssertEqual(COTDateParser.parseStaleAttribute("not-a-date"), COTDateParser.noExpirationStale)
+    }
 }

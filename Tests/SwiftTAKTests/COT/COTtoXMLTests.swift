@@ -11,7 +11,7 @@ import XCTest
 
 final class COToXMLTests: XCTestCase {
     func testCOTChatToXML() throws {
-        let expected = "<__chat id='All Chat Rooms' chatroom='All Chat Rooms' groupOwner='TESTGO' parent='12345' senderCallsign='TRACKER-1' messageID='45678' ></__chat>"
+        let expected = "<__chat id='All Chat Rooms' chatroom='All Chat Rooms' groupOwner='TESTGO' parent='12345' senderCallsign='TRACKER-1' messageId='45678' ></__chat>"
         let cotChat = COTChat(id: "All Chat Rooms", chatroom: "All Chat Rooms", groupOwner: "TESTGO", parent: "12345", senderCallsign: "TRACKER-1", messageID: "45678")
         
         let expectedDoc = try XMLDocument(xmlString: expected)
@@ -19,7 +19,31 @@ final class COToXMLTests: XCTestCase {
         
         XCTAssertEqual(expectedDoc, actualDoc)
     }
+
+    func testCOTChatToXMLIncludesChatGroupChild() throws {
+        let chatGroup = COTChatGroup(uid0: "SENDER", uid1: "All Chat Rooms", id: "All Chat Rooms")
+        let cotChat = COTChat(
+            id: "All Chat Rooms",
+            chatroom: "All Chat Rooms",
+            groupOwner: "false",
+            parent: "RootContactGroup",
+            senderCallsign: "ALPHA",
+            messageID: "MSG-1",
+            chatGroup: chatGroup
+        )
+        let xml = cotChat.toXml()
+        XCTAssertTrue(xml.contains("<chatgrp"))
+        XCTAssertTrue(xml.contains("uid0='SENDER'") || xml.contains("uid0=\"SENDER\""))
+        XCTAssertTrue(xml.contains("id='All Chat Rooms'") || xml.contains("id=\"All Chat Rooms\""))
+    }
     
+    func testCOTContactToXMLOmitsEmptyEndpoint() throws {
+        let cotContact = COTContact(callsign: "MARKER-1")
+        let xml = cotContact.toXml()
+        XCTAssertFalse(xml.contains("endpoint"), xml)
+        XCTAssertTrue(xml.contains("callsign='MARKER-1'") || xml.contains("callsign=\"MARKER-1\""), xml)
+    }
+
     func testCOTContactToXML() throws {
         let expected = "<contact endpoint='*:-1:stcp' phone='2125551212' callsign='TESTGO'></contact>"
         let cotContact = COTContact(endpoint: "*:-1:stcp", phone: "2125551212", callsign: "TESTGO")
@@ -41,7 +65,7 @@ final class COToXMLTests: XCTestCase {
     }
     
     func testCOTDetailWithChildNodesToXML() throws {
-        let expected = "<detail><contact callsign='TESTGO' endpoint='*:-1:stcp'></contact></detail>"
+        let expected = "<detail><contact callsign='TESTGO'></contact></detail>"
         let cotContact = COTContact(callsign: "TESTGO")
         var cotDetail = COTDetail()
         cotDetail.childNodes.append(cotContact)
@@ -114,6 +138,15 @@ final class COToXMLTests: XCTestCase {
         XCTAssertEqual(expectedDoc, actualDoc)
     }
     
+    func testCOTLinkWithLineToXML() throws {
+        let nested = "<?xml version='1.0'?><event type='u-d-f'><detail><link point='1,2'/></detail></event>"
+        let cotLink = COTLink(line: nested)
+        let xml = cotLink.toXml()
+        let doc = try XMLDocument(xmlString: xml)
+        let lineAttr = doc.rootElement()?.attribute(forName: "line")?.stringValue
+        XCTAssertEqual(nested, lineAttr)
+    }
+
     func testCOTPointToXML() throws {
         let expected = "<point lat='31.5' lon='-71.5' hae='1.0' ce='2.0' le='3.0'></point>"
         let cotPoint = COTPoint(lat: "31.5", lon: "-71.5", hae: "1.0", ce: "2.0", le: "3.0")
@@ -127,7 +160,7 @@ final class COToXMLTests: XCTestCase {
     func testCOTRemarksToXML() throws {
         let ts_date = Date.now
         let timestamp = ISO8601DateFormatter().string(from: ts_date)
-        let expected = "<remarks source='BAO.F.TRACKER' timestamp='\(timestamp)' >Test Message</remarks>"
+        let expected = "<remarks source='BAO.F.TRACKER' time='\(timestamp)' >Test Message</remarks>"
         let cotRemarks = COTRemarks(source: "BAO.F.TRACKER", timestamp: ts_date, message: "Test Message")
         
         let expectedDoc = try XMLDocument(xmlString: expected)

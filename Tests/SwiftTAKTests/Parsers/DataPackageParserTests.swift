@@ -26,6 +26,15 @@ final class DPMultiPrefEnrollmentTests: DataPackageParserTests {
         XCTAssertEqual(parser.packageContents.preferenceItems["atakRoleType"], "Team Member")
         XCTAssertEqual(parser.packageContents.preferenceItems["connectString0"], "192.168.0.49:8089:ssl")
     }
+
+    func testLoadsServerConnectionsFromCotStreams() {
+        let parser = loadParser(fileName: dataPackageFilename(), fileExtension: TestConstants.DP_FILE_EXTENSION)
+        parser.parse()
+        XCTAssertEqual(parser.packageContents.serverConnections.count, 1)
+        XCTAssertEqual(parser.packageContents.serverConnections[0].host, "192.168.0.49")
+        XCTAssertEqual(parser.packageContents.serverConnections[0].port, "8089")
+        XCTAssertTrue(parser.packageContents.serverConnections[0].enabled)
+    }
 }
 
 final class DPMultipleServerCertsATAKFormat: DataPackageParserTests {

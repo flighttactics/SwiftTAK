@@ -117,7 +117,7 @@ public class COTMessage: NSObject {
         
         var cotDetail = COTDetail()
         
-        cotDetail.childNodes.append(COTContact(phone: phone, callsign: callSign))
+        cotDetail.childNodes.append(COTContact(endpoint: COTContact.DEFAULT_ENDPOINT, phone: phone, callsign: callSign))
         cotDetail.childNodes.append(COTRemarks(message: remarks))
         cotDetail.childNodes.append(COTGroup(name: group, role: role))
         cotDetail.childNodes.append(COTUid(callsign: callSign))
@@ -153,20 +153,77 @@ public class COTMessage: NSObject {
                                     receiver: String = TAKConstants.DEFAULT_CHATROOM_NAME,
                                     destinationUrl: String,
                                     positionInfo: COTPositionInformation = COTPositionInformation()) -> String {
+        generateChatMessage(
+            message: message,
+            senderCallsign: sender,
+            conversationId: receiver,
+            positionInfo: positionInfo
+        )
+    }
+
+    public func generateChatMessage(
+        message: String,
+        senderCallsign: String,
+        senderUid: String? = nil,
+        conversationId: String = TAKConstants.DEFAULT_CHATROOM_NAME,
+        chatroom: String? = nil,
+        parent: String = TAKConstants.ROOT_CONTACT_GROUP,
+        groupOwner: Bool = false,
+        memberUids: [String]? = nil,
+        messageID: String? = nil,
+        senderCotType: String = COTMessage.DEFAULT_COT_TYPE,
+        destUids: [String] = [],
+        includeHierarchy: Bool = false,
+        deleteChildUids: [String] = [],
+        positionInfo: COTPositionInformation = COTPositionInformation()
+    ) -> String {
+        COTMessage.XML_HEADER + generateChatEvent(
+            message: message,
+            senderCallsign: senderCallsign,
+            senderUid: senderUid,
+            conversationId: conversationId,
+            chatroom: chatroom,
+            parent: parent,
+            groupOwner: groupOwner,
+            memberUids: memberUids,
+            messageID: messageID,
+            senderCotType: senderCotType,
+            destUids: destUids,
+            includeHierarchy: includeHierarchy,
+            deleteChildUids: deleteChildUids,
+            positionInfo: positionInfo
+        ).toXml()
+    }
+
+    public func generateChatEvent(
+        message: String,
+        senderCallsign: String,
+        senderUid: String? = nil,
+        conversationId: String = TAKConstants.DEFAULT_CHATROOM_NAME,
+        chatroom: String? = nil,
+        parent: String = TAKConstants.ROOT_CONTACT_GROUP,
+        groupOwner: Bool = false,
+        memberUids: [String]? = nil,
+        messageID: String? = nil,
+        senderCotType: String = COTMessage.DEFAULT_COT_TYPE,
+        destUids: [String] = [],
+        includeHierarchy: Bool = false,
+        deleteChildUids: [String] = [],
+        positionInfo: COTPositionInformation = COTPositionInformation()
+    ) -> COTEvent {
         let cotType = COTMessage.DEFAULT_CHAT_COT_TYPE
         let cotHow = HowType.HumanGIGO.rawValue
         let ONE_DAY = 60.0*60.0*24.0
         let eventTime = Date()
         let stale = Date().addingTimeInterval(ONE_DAY)
-        
-        let from = sender
-        let conversationID = UUID().uuidString
-        let messageID = UUID().uuidString
-        
-        let eventUID = "GeoChat.\(from).\(conversationID).\(messageID)"
-        
+        let resolvedSenderUid = senderUid ?? deviceID
+        let resolvedChatroom = chatroom ?? conversationId
+        let resolvedMessageID = messageID ?? UUID().uuidString
+        let resolvedMembers = memberUids ?? [resolvedSenderUid, conversationId]
+        let eventUID = "GeoChat.\(resolvedSenderUid).\(conversationId).\(resolvedMessageID)"
+
         var cotEvent = COTEvent(version: COTMessage.COT_EVENT_VERSION, uid: eventUID, type: cotType, how: cotHow, time: eventTime, start: eventTime, stale: stale)
-        
+
         cotEvent.childNodes.append(COTPoint(
             lat: positionInfo.latitude.description,
             lon: positionInfo.longitude.description,
@@ -175,19 +232,34 @@ public class COTMessage: NSObject {
             le: positionInfo.linearError.description))
 
         var cotDetail = COTDetail()
-        
-        let remarksSource = "BAO.F.TAKTracker.\(from)"
-        
-        let cotChat = COTChat(senderCallsign: from, messageID: messageID)
-        let cotLink = COTLink(relation: LinkType.ParentProducer.rawValue, type: "a-f-G-U-C", uid: messageID)
-        let cotRemarks = COTRemarks(source: remarksSource, timestamp: Date.now, message: message)
-        
+        let remarksSource = "BAO.F.TAKAware.\(resolvedSenderUid)"
+        let chatGroup = COTChatGroup(memberUids: resolvedMembers, id: conversationId)
+        let cotChat = COTChat(
+            id: conversationId,
+            chatroom: resolvedChatroom,
+            groupOwner: groupOwner ? "true" : "false",
+            parent: parent,
+            senderCallsign: senderCallsign,
+            messageID: resolvedMessageID,
+            chatGroup: chatGroup,
+            hierarchy: includeHierarchy ? COTChatHierarchy.userGroup(id: conversationId, name: resolvedChatroom) : nil,
+            deleteChildren: deleteChildUids.map { COTDeleteChild(uid: $0, chatroom: resolvedChatroom, id: conversationId) }
+        )
+        let cotLink = COTLink(relation: LinkType.ParentProducer.rawValue, type: senderCotType, uid: resolvedSenderUid)
+        let cotRemarks = COTRemarks(
+            source: remarksSource,
+            timestamp: eventTime,
+            message: message,
+            to: conversationId
+        )
+
         cotDetail.childNodes.append(cotChat)
         cotDetail.childNodes.append(cotLink)
         cotDetail.childNodes.append(cotRemarks)
-        
+        if !destUids.isEmpty {
+            cotDetail.childNodes.append(COTMarti(uids: destUids))
+        }
         cotEvent.childNodes.append(cotDetail)
-        
-        return COTMessage.XML_HEADER + cotEvent.toXml()
+        return cotEvent
     }
 }

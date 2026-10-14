@@ -64,7 +64,72 @@ final class XMLTests: XCTestCase {
         XCTAssertEqual(chatNode.attribute(forName: "chatroom")!.stringValue, "All Chat Rooms")
         XCTAssertEqual(chatNode.attribute(forName: "senderCallsign")!.stringValue, "TEST-TRACKER")
         
-        XCTAssertEqual(remarksNode.attribute(forName: "source")!.stringValue, "BAO.F.TAKTracker.TEST-TRACKER")
+        let chatGroupNode = try actualDoc.nodes(forXPath: "//chatgrp").first! as! XMLElement
+        let eventNode = try actualDoc.nodes(forXPath: "//event").first! as! XMLElement
+        let linkNode = try actualDoc.nodes(forXPath: "//link").first! as! XMLElement
+        let eventUid = eventNode.attribute(forName: "uid")!.stringValue
+        let senderUid = cotMessage!.deviceID
+
+        XCTAssertEqual(remarksNode.attribute(forName: "source")!.stringValue, "BAO.F.TAKAware.\(senderUid)")
+        XCTAssertEqual(remarksNode.attribute(forName: "to")!.stringValue, "All Chat Rooms")
         XCTAssertEqual(remarksNode.stringValue, "Hello, World")
+        XCTAssertEqual(chatNode.attribute(forName: "parent")!.stringValue, "RootContactGroup")
+        XCTAssertEqual(chatGroupNode.attribute(forName: "uid0")!.stringValue, senderUid)
+        XCTAssertEqual(chatGroupNode.attribute(forName: "uid1")!.stringValue, "All Chat Rooms")
+        XCTAssertEqual(linkNode.attribute(forName: "uid")!.stringValue, senderUid)
+        XCTAssertTrue(eventUid.hasPrefix("GeoChat.\(senderUid).All Chat Rooms."))
+    }
+
+    func testGeneratingDirectChatIncludesMartiDest() throws {
+        let result = cotMessage!.generateChatMessage(
+            message: "Private ping",
+            senderCallsign: "ALPHA",
+            senderUid: "SENDER",
+            conversationId: "PEER",
+            chatroom: "BRAVO",
+            memberUids: ["SENDER", "PEER"],
+            messageID: "MSG-DM",
+            destUids: ["PEER"]
+        )
+        XCTAssertTrue(result.contains("<marti"))
+        XCTAssertTrue(result.contains("uid='PEER'") || result.contains("uid=\"PEER\""))
+        XCTAssertTrue(result.contains("GeoChat.SENDER.PEER.MSG-DM"))
+    }
+
+    func testGeneratingGroupChatIncludesHierarchy() throws {
+        let result = cotMessage!.generateChatMessage(
+            message: "",
+            senderCallsign: "ALPHA",
+            senderUid: "SENDER",
+            conversationId: "GROUP-ID",
+            chatroom: "Squad",
+            parent: TAKConstants.USER_GROUPS_PARENT,
+            groupOwner: true,
+            memberUids: ["SENDER", "PEER-1"],
+            messageID: "MSG-G",
+            destUids: ["PEER-1"],
+            includeHierarchy: true
+        )
+        XCTAssertTrue(result.contains("<hierarchy"))
+        XCTAssertTrue(result.contains("UserGroups"))
+        XCTAssertTrue(result.contains("groupOwner='true'") || result.contains("groupOwner=\"true\""))
+    }
+
+    func testGeneratingChatMessageUsesStableConversationId() throws {
+        let messageID = "11111111-1111-1111-1111-111111111111"
+        let senderUid = "SENDER-UID"
+        let result = cotMessage!.generateChatMessage(
+            message: "Ping",
+            senderCallsign: "ALPHA",
+            senderUid: senderUid,
+            conversationId: "All Chat Rooms",
+            messageID: messageID
+        )
+        let actualDoc = try XMLDocument(xmlString: result)
+        let eventNode = try actualDoc.nodes(forXPath: "//event").first! as! XMLElement
+        XCTAssertEqual(
+            eventNode.attribute(forName: "uid")!.stringValue,
+            "GeoChat.\(senderUid).All Chat Rooms.\(messageID)"
+        )
     }
 }

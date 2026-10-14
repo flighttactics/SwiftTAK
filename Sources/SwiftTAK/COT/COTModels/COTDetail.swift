@@ -89,6 +89,14 @@ public struct COTDetail : COTNode, Equatable {
         return childNodes.first(where: { $0 is COTFileshare }) as? COTFileshare
     }
 
+    public var cotAckRequest: COTAckRequest? {
+        return childNodes.first(where: { $0 is COTAckRequest }) as? COTAckRequest
+    }
+
+    public var cotAckResponse: COTAckResponse? {
+        return childNodes.first(where: { $0 is COTAckResponse }) as? COTAckResponse
+    }
+
     public func toXml() -> String {
         return COTXMLHelper.generateXML(
             nodeName: "detail",

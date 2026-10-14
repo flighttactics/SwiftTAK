@@ -8,6 +8,20 @@
 import Foundation
 
 public class COTDateParser {
+    /// Marker for XML CoT whose `stale` attribute was absent or not parseable.
+    /// Ingest layers should treat this as “never auto-expire”.
+    public static let noExpirationStale = Date.distantFuture
+
+    /// Parses XML `stale`; missing or invalid values do not default to “stale now”.
+    public static func parseStaleAttribute(_ rawValue: String?) -> Date {
+        guard let rawValue else { return noExpirationStale }
+        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let parsed = parse(trimmed) else {
+            return noExpirationStale
+        }
+        return parsed
+    }
+
     public static func parse(_ dateString: String) -> Date? {
         var parsedDate: Date? = nil
         let standardFormat = Date.ISO8601FormatStyle()

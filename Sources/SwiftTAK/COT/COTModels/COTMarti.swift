@@ -5,47 +5,58 @@
 //  Created by Cory Foy on 6/5/25.
 //
 
-public struct COTMarti: COTNode, Equatable {
+public struct COTMartiDest: COTNode, Equatable {
     public var uid: String?
     public var callsign: String?
     public var mission: String?
-    
-    public init(uid: String) {
+
+    public init(uid: String? = nil, callsign: String? = nil, mission: String? = nil) {
         self.uid = uid
-        self.callsign = nil
-        self.mission = nil
-    }
-    
-    public init(callsign: String) {
         self.callsign = callsign
-        self.uid = nil
-        self.mission = nil
-    }
-    
-    public init(mission: String) {
         self.mission = mission
-        self.uid = nil
-        self.callsign = nil
     }
-    
+
     public func toXml() -> String {
-        var attrs: [String:String] = [:]
-        if let uid = uid {
-            attrs["uid"] = uid
-        }
-        if let callsign = callsign {
-            attrs["callsign"] = callsign
-        }
-        if let mission = mission {
-            attrs["mission"] = mission
-        }
-        let dest = COTXMLHelper.generateXML(nodeName: "dest", attributes: attrs, message: "")
-        return COTXMLHelper.generateXML(nodeName: "marti", attributes: [:], message: dest)
+        var attrs: [String: String] = [:]
+        if let uid { attrs["uid"] = uid }
+        if let callsign { attrs["callsign"] = callsign }
+        if let mission { attrs["mission"] = mission }
+        return COTXMLHelper.generateXML(nodeName: "dest", attributes: attrs, message: "")
     }
-    
+}
+
+public struct COTMarti: COTNode, Equatable {
+    public var destinations: [COTMartiDest]
+
+    public var uid: String? { destinations.first?.uid }
+    public var callsign: String? { destinations.first?.callsign }
+    public var mission: String? { destinations.first?.mission }
+
+    public init(uid: String) {
+        self.destinations = [COTMartiDest(uid: uid)]
+    }
+
+    public init(callsign: String) {
+        self.destinations = [COTMartiDest(callsign: callsign)]
+    }
+
+    public init(mission: String) {
+        self.destinations = [COTMartiDest(mission: mission)]
+    }
+
+    public init(destinations: [COTMartiDest]) {
+        self.destinations = destinations
+    }
+
+    public init(uids: [String]) {
+        self.destinations = uids.map { COTMartiDest(uid: $0) }
+    }
+
+    public func toXml() -> String {
+        COTXMLHelper.generateXML(nodeName: "marti", attributes: [:], childNodes: destinations)
+    }
+
     public static func == (lhs: COTMarti, rhs: COTMarti) -> Bool {
-        return lhs.uid == rhs.uid &&
-        lhs.callsign == rhs.callsign &&
-        lhs.mission == rhs.mission
+        lhs.destinations == rhs.destinations
     }
 }

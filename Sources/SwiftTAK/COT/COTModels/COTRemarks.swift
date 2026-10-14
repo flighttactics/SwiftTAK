@@ -24,7 +24,8 @@ public struct COTRemarks : COTNode, Equatable {
         let ts = timestamp == nil ? "" : ISO8601DateFormatter().string(from: timestamp!)
         var attrs: [String:String] = [:]
         attrs["source"] = source
-        attrs["timestamp"] = ts
+        // ATAK GeoChat uses `time`; emit that for interop.
+        attrs["time"] = ts
         attrs["to"] = to
         return COTXMLHelper.generateXML(nodeName: "remarks", attributes: attrs, message: message)
     }

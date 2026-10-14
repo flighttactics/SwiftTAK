@@ -66,7 +66,7 @@ public class COTXMLParser {
                         how: eventAttributes["how"]?.text ?? "",
                         time: COTDateParser.parse(eventAttributes["time"]?.text ?? "") ?? Date(),
                         start: COTDateParser.parse(eventAttributes["start"]?.text ?? "") ?? Date(),
-                        stale: COTDateParser.parse(eventAttributes["stale"]?.text ?? "") ?? Date())
+                        stale: COTDateParser.parseStaleAttribute(eventAttributes["stale"]?.text))
     }
     
     func buildCOTPoint(cot: XMLIndexer) -> COTPoint? {
@@ -103,6 +103,10 @@ public class COTXMLParser {
             
             if let cotChat = buildCOTChat(cot: cot) {
                 detail.childNodes.append(cotChat)
+            }
+            
+            if let cotMarti = buildCOTMarti(cot: cot) {
+                detail.childNodes.append(cotMarti)
             }
             
             if let cotServerDestination = buildCOTServerDestination(cot: cot) {
@@ -176,6 +180,12 @@ public class COTXMLParser {
             if let cotFileshare = buildCOTFileshare(cot: cot) {
                 detail.childNodes.append(cotFileshare)
             }
+            if let ackRequest = buildCOTAckRequest(cot: cot) {
+                detail.childNodes.append(ackRequest)
+            }
+            if let ackResponse = buildCOTAckResponse(cot: cot) {
+                detail.childNodes.append(ackResponse)
+            }
             
             return detail
         }
@@ -203,6 +213,32 @@ public class COTXMLParser {
             )
         }
         return nil
+    }
+
+    func buildCOTAckRequest(cot: XMLIndexer) -> COTAckRequest? {
+        guard let node = cot["event"]["detail"]["ackrequest"].element else { return nil }
+        let attrs = node.allAttributes
+        let uid = attrs["uid"]?.text ?? ""
+        guard !uid.isEmpty else { return nil }
+        let ackRequested = (attrs["ackrequested"]?.text ?? "true") != "false"
+        let tag = attrs["tag"]?.text ?? ""
+        return COTAckRequest(uid: uid, ackRequested: ackRequested, tag: tag)
+    }
+
+    func buildCOTAckResponse(cot: XMLIndexer) -> COTAckResponse? {
+        guard let node = cot["event"]["detail"]["ackresponse"].element else { return nil }
+        let attrs = node.allAttributes
+        let uid = attrs["uid"]?.text ?? ""
+        guard !uid.isEmpty else { return nil }
+        return COTAckResponse(
+            uid: uid,
+            senderUid: attrs["senderUid"]?.text ?? "",
+            success: (attrs["success"]?.text ?? "false") == "true",
+            tag: attrs["tag"]?.text ?? "",
+            reason: attrs["reason"]?.text ?? "",
+            sha256: attrs["sha256"]?.text ?? "",
+            sizeInBytes: attrs["sizeInBytes"]?.text ?? "-1"
+        )
     }
     
     func buildCOTHideLabel(cot: XMLIndexer) -> COTHideLabel? {
@@ -362,7 +398,8 @@ public class COTXMLParser {
                     rtspReliable: connectionAttrs["rtspReliable"].toI(),
                     ignoreEmbeddedKLV: connectionAttrs["ignoreEmbeddedKLV"].toB(),
                     networkTimeout: connectionAttrs["networkTimeout"].toI(),
-                    bufferTime: connectionAttrs["bufferTime"].toI())
+                    bufferTime: connectionAttrs["bufferTime"].toI(),
+                    passphrase: connectionAttrs["passphrase"]?.text)
             }
             let attributes = cotVideo.allAttributes
             return COTVideo(
@@ -387,7 +424,12 @@ public class COTXMLParser {
     func buildCOTColor(cot: XMLIndexer) -> COTColor? {
         if let cotIcon = cot["event"]["detail"]["color"].element {
             let colorAttributes = cotIcon.allAttributes
-            let argbString = colorAttributes["argb"]?.text ?? ""
+            // ATAK is inconsistent: markers often use `argb`, shapes/routes use `value`
+            // (and some events include both). Prefer argb, then value — same as ATAK's
+            // ColorDetailHandler.
+            let argbString = colorAttributes["argb"]?.text
+                ?? colorAttributes["value"]?.text
+                ?? ""
             guard let argb = Int(argbString) else {
                 return nil
             }
@@ -409,7 +451,7 @@ public class COTXMLParser {
         if let cotContact = cot["event"]["detail"]["contact"].element {
             let contactAttributes = cotContact.allAttributes
             return COTContact(
-                endpoint: contactAttributes["endpoint"]?.text ?? COTContact.DEFAULT_ENDPOINT,
+                endpoint: contactAttributes["endpoint"]?.text ?? "",
                 phone: contactAttributes["phone"]?.text ?? "",
                 callsign: contactAttributes["callsign"]?.text ?? ""
             )
@@ -420,9 +462,10 @@ public class COTXMLParser {
     func buildCOTRemarks(cot: XMLIndexer) -> COTRemarks? {
         if let cotRemarks = cot["event"]["detail"]["remarks"].element {
             let remarksAttributes = cotRemarks.allAttributes
+            let timeString = remarksAttributes["time"]?.text ?? remarksAttributes["timestamp"]?.text ?? ""
             return COTRemarks(
                 source: remarksAttributes["source"]?.text ?? "",
-                timestamp: COTDateParser.parse(remarksAttributes["time"]?.text ?? ""),
+                timestamp: COTDateParser.parse(timeString),
                 message: cotRemarks.text,
                 to: remarksAttributes["to"]?.text ?? ""
             )
@@ -455,22 +498,75 @@ public class COTXMLParser {
                 groupOwner: chatAttributes["groupOwner"]?.text ?? "",
                 parent: chatAttributes["parent"]?.text ?? "",
                 senderCallsign: chatAttributes["senderCallsign"]?.text ?? "",
-                messageID: chatAttributes["messageId"]?.text ?? UUID().uuidString
+                messageID: chatAttributes["messageId"]?.text ?? chatAttributes["messageID"]?.text ?? UUID().uuidString
             )
             
             if let cotChatGroup = cot["event"]["detail"]["__chat"]["chatgrp"].element {
                 let chatGroupAttributes = cotChatGroup.allAttributes
+                var extraUids: [String] = []
+                var index = 2
+                while let extra = chatGroupAttributes["uid\(index)"]?.text, !extra.isEmpty {
+                    extraUids.append(extra)
+                    index += 1
+                }
                 let chatGroup = COTChatGroup(
                     uid0: chatGroupAttributes["uid0"]?.text ?? UUID().uuidString,
                     uid1: chatGroupAttributes["uid1"]?.text ?? COTChatGroup.DEFAULT_CHATROOM,
-                    id: chatGroupAttributes["id"]?.text ?? COTChatGroup.DEFAULT_CHATROOM
+                    id: chatGroupAttributes["id"]?.text ?? COTChatGroup.DEFAULT_CHATROOM,
+                    extraUids: extraUids
                 )
                 chat.cotChatGroup = chatGroup
+            }
+
+            if cot["event"]["detail"]["__chat"]["hierarchy"].element != nil {
+                let rootIndexer = cot["event"]["detail"]["__chat"]["hierarchy"]["group"]
+                if let root = buildHierarchyGroup(rootIndexer) {
+                    chat.hierarchy = COTChatHierarchy(root: root)
+                }
+            }
+
+            chat.deleteChildren = cot["event"]["detail"]["__chat"]["deleteChild"].all.compactMap { indexer in
+                guard let element = indexer.element else { return nil }
+                let attrs = element.allAttributes
+                return COTDeleteChild(
+                    uid: attrs["uid"]?.text ?? "",
+                    chatroom: attrs["chatroom"]?.text ?? "",
+                    id: attrs["id"]?.text ?? ""
+                )
             }
             
             return chat
         }
         return nil
+    }
+
+    func buildHierarchyGroup(_ indexer: XMLIndexer) -> COTChatHierarchyGroup? {
+        guard let element = indexer.element else { return nil }
+        let attrs = element.allAttributes
+        let children = indexer["group"].all.compactMap { buildHierarchyGroup($0) }
+        return COTChatHierarchyGroup(
+            uid: attrs["uid"]?.text ?? "",
+            name: attrs["name"]?.text ?? "",
+            children: children
+        )
+    }
+
+    func buildCOTMarti(cot: XMLIndexer) -> COTMarti? {
+        let destIndexers = cot["event"]["detail"]["marti"]["dest"].all
+        guard !destIndexers.isEmpty else { return nil }
+        let destinations: [COTMartiDest] = destIndexers.compactMap { indexer in
+            guard let element = indexer.element else { return nil }
+            let attrs = element.allAttributes
+            let uid = attrs["uid"]?.text
+            let callsign = attrs["callsign"]?.text
+            let mission = attrs["mission"]?.text
+            if uid == nil && callsign == nil && mission == nil {
+                return nil
+            }
+            return COTMartiDest(uid: uid, callsign: callsign, mission: mission)
+        }
+        guard !destinations.isEmpty else { return nil }
+        return COTMarti(destinations: destinations)
     }
     
     func buildCOTLinks(cot: XMLIndexer) -> [COTLink] {
@@ -489,7 +585,8 @@ public class COTXMLParser {
                     remarks: linkAttributes["remarks"]?.text ?? "",
                     point: linkAttributes["point"]?.text ?? "",
                     url: linkAttributes["url"]?.text ?? "",
-                    mimeType: linkAttributes["mime"]?.text ?? ""
+                    mimeType: linkAttributes["mime"]?.text ?? "",
+                    line: linkAttributes["line"]?.text ?? ""
                 )
                 result.append(resultNode)
             }

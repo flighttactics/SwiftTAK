@@ -25,7 +25,14 @@ public struct DataPackageContentsFile: Sendable {
     public var fileLocation: String
     public var parameters: [String:String] = [:]
     public var fileName: String {
-        URL(string: fileLocation)?.lastPathComponent ?? fileLocation
+        let normalized = fileLocation
+            .replacingOccurrences(of: "\\", with: "/")
+        return normalized.split(separator: "/").last.map(String.init) ?? fileLocation
+    }
+
+    /// ATAK/legacy manifests may use backslash zipEntry paths.
+    public var normalizedZipEntry: String {
+        fileLocation.replacingOccurrences(of: "\\", with: "/")
     }
 }
 
@@ -42,9 +49,11 @@ public struct DataPackageContents {
     public var serverSecureApiPort: String = "8443"
     public var serverProtocol: String = "SSL" //TCP, SSL, QUIC
     public var preferenceItems: [String: String] = [:]
+    /// All `cot_streams` connections discovered from preference entries.
+    public var serverConnections: [TAKServerConnectionPreference] = []
     
     public var hasServerDefined: Bool {
-        !serverURL.isEmpty
+        !serverURL.isEmpty || !serverConnections.isEmpty
     }
     
     public var hasServerCertificates: Bool {
@@ -108,7 +117,7 @@ public class DataPackageParser: NSObject {
     }
     
     func retrieveFileUrlFromArchive(fileName: String) -> URL? {
-        var fileLocation = fileName
+        var fileLocation = fileName.replacingOccurrences(of: "\\", with: "/")
         
         guard !fileName.isEmpty else {
             TAKLogger.debug("[DataPackageParser] Attempting to retrieve a file URL without a filename. Ignoring")
@@ -141,7 +150,7 @@ public class DataPackageParser: NSObject {
     }
     
     func retrieveFileFromArchive(fileName: String) -> Data {
-        var fileLocation = fileName
+        var fileLocation = fileName.replacingOccurrences(of: "\\", with: "/")
         var fileData = Data()
         
         guard !fileName.isEmpty else {
@@ -234,7 +243,8 @@ public class DataPackageParser: NSObject {
                     TAKLogger.error("May not be able to delete existing file")
                 }
                 try fileManager.unzipItem(at: sourceURL, to: extractLocation)
-                dataPackageContents = fileManager.subpaths(atPath: extractLocation.relativePath) ?? []
+                dataPackageContents = (fileManager.subpaths(atPath: extractLocation.relativePath) ?? [])
+                    .map { $0.replacingOccurrences(of: "\\", with: "/") }
                 TAKLogger.debug("[DataPackageParser] Found \(dataPackageContents.count) files")
             } catch {
                 TAKLogger.error("[DataPackageParser] Unable to extract data package to \(extractLocation.relativePath): \(error) \(FileManager.default.fileExists(atPath: extractLocation.absoluteString))")
@@ -254,7 +264,7 @@ public class DataPackageParser: NSObject {
             
             TAKLogger.debug("[DataPackageParser]: Files in archive")
             dataPackageContents = archive!.map { entry in
-                return entry.path
+                entry.path.replacingOccurrences(of: "\\", with: "/")
             }
             TAKLogger.debug("[DataPackageParser]: " + String(describing: dataPackageContents))
         }
@@ -371,13 +381,24 @@ public class DataPackageParser: NSObject {
     }
 
     func storePreferences(preferences: TAKPreferences) {
-        guard !preferences.serverConnectionAddress().isEmpty else { return }
+        let connections = preferences.cotStreamConnections()
+        packageContents.serverConnections = connections
+
+        guard let primary = connections.first(where: \.enabled) ?? connections.first else {
+            guard !preferences.serverConnectionAddress().isEmpty else { return }
+            packageContents.userCertificatePassword = preferences.userCertificatePassword
+            packageContents.serverCertificatePassword = preferences.serverCertificatePassword
+            packageContents.serverURL = preferences.serverConnectionAddress()
+            packageContents.serverPort = preferences.serverConnectionPort()
+            packageContents.serverProtocol = preferences.serverConnectionProtocol()
+            return
+        }
+
         packageContents.userCertificatePassword = preferences.userCertificatePassword
         packageContents.serverCertificatePassword = preferences.serverCertificatePassword
-
-        packageContents.serverURL = preferences.serverConnectionAddress()
-        packageContents.serverPort = preferences.serverConnectionPort()
-        packageContents.serverProtocol = preferences.serverConnectionProtocol()
+        packageContents.serverURL = primary.host
+        packageContents.serverPort = primary.port
+        packageContents.serverProtocol = primary.protocolName
     }
     
     func parsePrefsFile(prefsFile: String) -> TAKPreferences {

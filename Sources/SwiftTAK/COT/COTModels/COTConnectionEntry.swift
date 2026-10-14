@@ -42,14 +42,114 @@ public struct COTConnectionEntry : COTNode, Equatable {
     public var source: String? = nil
     public var thumbnail: String? = nil
     public var width: Int32? = nil
+    /// SRT stream encryption passphrase (ATAK `ConnectionEntry.passphrase`).
+    public var passphrase: String? = nil
+
+    public init(
+        uid: String = "",
+        alias: String,
+        connectionProtocol: String,
+        address: String,
+        port: Int,
+        path: String,
+        roverPort: Int,
+        rtspReliable: Int,
+        ignoreEmbeddedKLV: Bool,
+        networkTimeout: Int,
+        bufferTime: Int,
+        active: Bool = true,
+        bitrate: Int32? = nil,
+        classification: String? = nil,
+        fov: String? = nil,
+        heading: String? = nil,
+        height: Int32? = nil,
+        latitude: String? = nil,
+        longitude: String? = nil,
+        macAddress: String? = nil,
+        order: Int32? = nil,
+        range: String? = nil,
+        source: String? = nil,
+        thumbnail: String? = nil,
+        width: Int32? = nil,
+        passphrase: String? = nil
+    ) {
+        self.uid = uid
+        self.alias = alias
+        self.connectionProtocol = connectionProtocol
+        self.address = address
+        self.port = port
+        self.path = path
+        self.roverPort = roverPort
+        self.rtspReliable = rtspReliable
+        self.ignoreEmbeddedKLV = ignoreEmbeddedKLV
+        self.networkTimeout = networkTimeout
+        self.bufferTime = bufferTime
+        self.active = active
+        self.bitrate = bitrate
+        self.classification = classification
+        self.fov = fov
+        self.heading = heading
+        self.height = height
+        self.latitude = latitude
+        self.longitude = longitude
+        self.macAddress = macAddress
+        self.order = order
+        self.range = range
+        self.source = source
+        self.thumbnail = thumbnail
+        self.width = width
+        self.passphrase = passphrase
+    }
     
     public var url: String {
-        if let uri = URL(string: address) {
-            if uri.scheme != nil {
-                return address
-            }
+        // Require a real scheme:// prefix. Credentialed hosts like
+        // "user:pass@camera.example.com" parse as scheme "user" via URL(string:),
+        // which previously returned the bare address and broke RTSP playback.
+        if address.contains("://") {
+            return address
         }
         return "\(connectionProtocol)://\(address):\(port)\(path)"
+    }
+
+    /// Hostname with any embedded `user:pass@` stripped (or host from an absolute address).
+    public var host: String {
+        if address.contains("://"),
+           let url = URL(string: address),
+           let host = url.host, !host.isEmpty {
+            return host
+        }
+        if let at = address.lastIndex(of: "@") {
+            return String(address[address.index(after: at)...])
+        }
+        return address
+    }
+
+    /// Credentials embedded in `address` as `user:pass@host` (ATAK sometimes does this).
+    public var embeddedCredentials: (username: String, password: String?)? {
+        if address.contains("://") {
+            guard let url = URL(string: address) else { return nil }
+            guard let user = url.user, !user.isEmpty else { return nil }
+            return (user, url.password)
+        }
+        guard let at = address.lastIndex(of: "@") else { return nil }
+        let credentials = String(address[..<at])
+        guard !credentials.isEmpty else { return nil }
+        if let colon = credentials.firstIndex(of: ":") {
+            let username = String(credentials[..<colon])
+            let password = String(credentials[credentials.index(after: colon)...])
+            guard !username.isEmpty else { return nil }
+            return (username, password)
+        }
+        return (credentials, nil)
+    }
+
+    /// Stream identity used to cross-check against `__video url`.
+    var streamIdentity: COTVideo.StreamIdentity {
+        COTVideo.StreamIdentity(
+            host: host,
+            port: port > 0 ? port : nil,
+            path: path
+        )
     }
 
     public func toXml() -> String {
@@ -66,6 +166,9 @@ public struct COTConnectionEntry : COTNode, Equatable {
         attrs["networkTimeout"] = networkTimeout.description
         attrs["bufferTime"] = bufferTime.description
         attrs["active"] = active ? "true" : "false"
+        if let passphrase, !passphrase.isEmpty {
+            attrs["passphrase"] = passphrase
+        }
         
         return COTXMLHelper.generateXML(nodeName: "ConnectionEntry", attributes: attrs, message: "")
     }
@@ -82,7 +185,8 @@ public struct COTConnectionEntry : COTNode, Equatable {
         lhs.ignoreEmbeddedKLV == rhs.ignoreEmbeddedKLV &&
         lhs.networkTimeout == rhs.networkTimeout &&
         lhs.bufferTime == rhs.bufferTime &&
-        lhs.active == rhs.active
+        lhs.active == rhs.active &&
+        lhs.passphrase == rhs.passphrase
     }
 }
 

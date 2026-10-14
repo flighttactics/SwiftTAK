@@ -19,12 +19,14 @@ public struct COTLink : COTNode, Equatable, Codable {
     public var point: String = ""
     public var url: String = ""
     public var mimeType: String = ""
+    /// ATAK MultiPolyline (`u-d-f-m`) embeds a full nested CoT event XML for each stroke.
+    public var line: String = ""
     
     public var isUrl: Bool {
         !url.isEmpty
     }
     
-    public init(parentCallsign: String = "", productionTime: String = "", relation: String = "", type: String = "", uid: String = "", callsign: String = "", remarks: String = "", point: String = "", url: String = "", mimeType: String = "") {
+    public init(parentCallsign: String = "", productionTime: String = "", relation: String = "", type: String = "", uid: String = "", callsign: String = "", remarks: String = "", point: String = "", url: String = "", mimeType: String = "", line: String = "") {
         self.parentCallsign = parentCallsign
         self.productionTime = productionTime
         self.relation = relation
@@ -35,6 +37,7 @@ public struct COTLink : COTNode, Equatable, Codable {
         self.point = point
         self.url = url
         self.mimeType = mimeType
+        self.line = line
     }
     
     public func toXml() -> String {
@@ -49,6 +52,7 @@ public struct COTLink : COTNode, Equatable, Codable {
         attrs["point"] = point
         attrs["url"] = url
         attrs["mime"] = mimeType
+        attrs["line"] = line
         return COTXMLHelper.generateXML(nodeName: "link", attributes: attrs, message: "")
     }
     
@@ -63,6 +67,7 @@ public struct COTLink : COTNode, Equatable, Codable {
             lhs.remarks == rhs.remarks &&
             lhs.point == rhs.point &&
             lhs.url == rhs.url &&
-            lhs.mimeType == rhs.mimeType
+            lhs.mimeType == rhs.mimeType &&
+            lhs.line == rhs.line
     }
 }

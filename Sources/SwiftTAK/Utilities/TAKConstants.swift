@@ -28,6 +28,8 @@ public struct TAKConstants {
     
     // Other constants
     public static let DEFAULT_CHATROOM_NAME = "All Chat Rooms"
+    public static let ROOT_CONTACT_GROUP = "RootContactGroup"
+    public static let USER_GROUPS_PARENT = "UserGroups"
     
     // Handy string array representations of some of the enums
     public static let TEAM_COLORS = TeamColor.allCases.map { $0.rawValue }

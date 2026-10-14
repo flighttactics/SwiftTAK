@@ -19,8 +19,41 @@ public struct TAKCertificatePreference {
     
     public var certificateFileName: String {
         get {
-            return certificateFilePath.components(separatedBy: "/").last ?? ""
+            return certificateFilePath
+                .replacingOccurrences(of: "\\", with: "/")
+                .components(separatedBy: "/")
+                .last ?? ""
         }
+    }
+}
+
+/// One ATAK `cot_streams` connection (`connectString0` / `description0` / `enabled0`, etc.).
+public struct TAKServerConnectionPreference: Sendable {
+    public var index: String
+    public var description: String
+    public var connectString: String
+    public var enabled: Bool
+
+    public init(index: String, description: String, connectString: String, enabled: Bool = true) {
+        self.index = index
+        self.description = description
+        self.connectString = connectString
+        self.enabled = enabled
+    }
+
+    public var host: String {
+        let parts = connectString.split(separator: ":", omittingEmptySubsequences: false).map(String.init)
+        return parts.first ?? ""
+    }
+
+    public var port: String {
+        let parts = connectString.split(separator: ":", omittingEmptySubsequences: false).map(String.init)
+        return parts.count > 1 ? parts[1] : "8089"
+    }
+
+    public var protocolName: String {
+        let parts = connectString.split(separator: ":", omittingEmptySubsequences: false).map(String.init)
+        return parts.count > 2 ? parts[2] : "ssl"
     }
 }
 
@@ -77,7 +110,8 @@ public struct TAKPreferences {
     }
     
     public func userCertificateFileName() -> String {
-        let splitFile = userCertificateFile.components(separatedBy: "/")
+        let normalized = userCertificateFile.replacingOccurrences(of: "\\", with: "/")
+        let splitFile = normalized.components(separatedBy: "/")
         return splitFile[splitFile.count-1]
     }
     
@@ -100,6 +134,55 @@ public struct TAKPreferences {
     public func serverConnectionProtocol() -> String {
         let splitFile = serverConnectionString.components(separatedBy: ":")
         return splitFile.count > 2 ? splitFile[2] : ""
+    }
+
+    /// Groups `connectString{N}` / `description{N}` / `enabled{N}` into connection records.
+    public func cotStreamConnections() -> [TAKServerConnectionPreference] {
+        var indices = Set<String>()
+        for key in entries.keys {
+            if key == "connectString" {
+                indices.insert("0")
+            } else if key.hasPrefix("connectString") {
+                let suffix = String(key.dropFirst("connectString".count))
+                if !suffix.isEmpty, suffix.allSatisfy(\.isNumber) {
+                    indices.insert(suffix)
+                }
+            }
+        }
+        if indices.isEmpty, !serverConnectionString.isEmpty {
+            return [
+                TAKServerConnectionPreference(
+                    index: "0",
+                    description: serverDescription,
+                    connectString: serverConnectionString,
+                    enabled: serverEnabled
+                )
+            ]
+        }
+
+        return indices.sorted { (Int($0) ?? 0) < (Int($1) ?? 0) }.compactMap { index in
+            let connectKey = index == "0" && entries["connectString0"] == nil
+                ? "connectString"
+                : "connectString\(index)"
+            let connect = entries[connectKey] ?? (index == "0" ? serverConnectionString : "")
+            guard !connect.isEmpty else { return nil }
+            let descriptionKey = index == "0" && entries["description0"] == nil
+                ? "description"
+                : "description\(index)"
+            // ATAK writes enabled0/enabled1; older packages may use bare `enabled` for stream 0.
+            let enabledKey = "enabled\(index)"
+            let description = entries[descriptionKey]
+                ?? (index == "0" ? serverDescription : "")
+            let enabledValue = entries[enabledKey]
+                ?? (index == "0" ? (entries["enabled"] ?? (serverEnabled ? "true" : "false")) : "true")
+            let enabled = enabledValue.lowercased() != "false"
+            return TAKServerConnectionPreference(
+                index: index,
+                description: description.isEmpty ? connect : description,
+                connectString: connect,
+                enabled: enabled
+            )
+        }
     }
 
     public mutating func merge(from other: TAKPreferences) {
@@ -162,6 +245,8 @@ public class PreferencesParser: NSObject, XMLParserDelegate {
                 preferences.serverDescription = value
             case "connectString0", "connectString":
                 preferences.serverConnectionString = value
+            case "enabled0", "enabled":
+                preferences.serverEnabled = value.lowercased() != "false"
             case "clientPassword":
                 preferences.userCertificatePassword = value
             case "certificateLocation":
@@ -175,6 +260,12 @@ public class PreferencesParser: NSObject, XMLParserDelegate {
                     preferences.addServerCertificateWithKey(certPath: value, key: currentAttr)
                 } else if(currentAttr.starts(with: "caPassword")) {
                     preferences.addServerCertificatePasswordWithKey(password: value, key: currentAttr)
+                } else if currentAttr.hasPrefix("connectString"),
+                          preferences.serverConnectionString.isEmpty {
+                    preferences.serverConnectionString = value
+                } else if currentAttr.hasPrefix("description"),
+                          preferences.serverDescription.isEmpty {
+                    preferences.serverDescription = value
                 }
             }
 
